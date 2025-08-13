@@ -1,7 +1,9 @@
 import pyautogui as pg
 
-active_window = pg.getActiveWindow()
-if active_window:
-    print(f'{active_window.title}')
-else:
-    print(f'No active window')
+
+def get_win_title():
+    active_window = pg.getActiveWindow()
+    if active_window:
+        return active_window.title()
+    else:
+        return None

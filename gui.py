@@ -7,8 +7,10 @@ import webbrowser as wb
 def open_link(event):
     webbrowser.open_new_tab('t.me/lupachosbot')
 
+# Function to open new window
 
-def setting_win():  # Function to open new window
+
+def setting_win():
     win = Tk()
     win.title('Settings')
     win.geometry('800x500')

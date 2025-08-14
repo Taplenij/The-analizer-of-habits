@@ -5,7 +5,7 @@ import webbrowser as wb
 
 
 def open_link(event):
-    webbrowser.open_new_tab('t.me/lupachosbot')
+    wb.open_new_tab('t.me/lupachosbot')
 
 # Function to open new window
 

@@ -1,4 +1,3 @@
-import webbrowser
 from tkinter import *
 from tkinter import ttk
 import webbrowser as wb
@@ -7,22 +6,25 @@ import webbrowser as wb
 def open_link(event):
     wb.open_new_tab('t.me/lupachosbot')
 
+
 # Function to open new window
-
-
 def setting_win():
     win = Tk()
     win.title('Settings')
     win.geometry('800x500')
     win.config(bg='darkgray')
-    frequency = ttk.Label(win, text='Set the analize frequency\n'
+
+    frequency = ttk.Label(win, text='Set the analysis frequency\n'
                                     'THE RESULTS ACCURACY WILL DIFFER!',
                           background='darkgray', font=('Arial', 12))
-    frequency.pack(anchor=NW)
+    frequency.pack(anchor=NW, fill=NONE)
     times = [f'{i} min' for i in range(5, 31, 5)]
     times_var = StringVar(value=times[0])
-    set_freq = ttk.Combobox(win, textvariable=times_var,values=times, font=('Arial', 10))
-    set_freq.pack(anchor=NW, pady=40)
+    set_freq = ttk.Combobox(win, textvariable=times_var, values=times, font=('Arial', 10))
+    set_freq.pack(anchor=NW, pady=20, fill=NONE)
+
+    canvas = Canvas(win, bg='black', height=700, width=2)
+    canvas.pack(anchor=N)
 
 
 # Create the main window

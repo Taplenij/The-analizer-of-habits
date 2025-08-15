@@ -14,17 +14,22 @@ def setting_win():
     win.geometry('800x500')
     win.config(bg='darkgray')
 
-    frequency = ttk.Label(win, text='Set the analysis frequency\n'
+    frequency = ttk.Label(win, text='Set the analysis frequency:\n'
                                     'THE RESULTS ACCURACY WILL DIFFER!',
                           background='darkgray', font=('Arial', 12))
-    frequency.pack(anchor=NW, fill=NONE)
+    frequency.place(x=1, y=1)
+    # Create a combobox
     times = [f'{i} min' for i in range(5, 31, 5)]
     times_var = StringVar(value=times[0])
     set_freq = ttk.Combobox(win, textvariable=times_var, values=times, font=('Arial', 10))
-    set_freq.pack(anchor=NW, pady=20, fill=NONE)
+    set_freq.place(x=1, y=40)
+    # I was too lazy to draw a line, so I just made a black canvas
+    canvas1 = Canvas(win, bg='black', highlightthickness=0, width=1, height=1080)
+    canvas1.pack(fill=Y)
 
-    canvas = Canvas(win, bg='black', height=700, width=2)
-    canvas.pack(anchor=N)
+    print_type = ttk.Label(win, text='Choose the format type output:',
+                           background='darkgray', font=('Arial', 12))
+    print_type.place(x=400, y=1)
 
 
 # Create the main window

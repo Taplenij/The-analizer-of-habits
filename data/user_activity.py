@@ -1,6 +1,7 @@
 import pyautogui as pg
 
 
+# Catch the open window
 async def get_win_title():
     active_window = pg.getActiveWindow()
     if active_window:

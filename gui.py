@@ -46,7 +46,7 @@ def setting_win():
     not_lab = ttk.Label(win, text='Receive notifications',
                         background='darkgray', font=('Arial', 14))
     not_lab.place(x=1, y=300)
-    rec_not = ttk.Checkbutton(win, variable=notifications, width=0, onvalue='yes', offvalue='no')
+    rec_not = ttk.Checkbutton(win, variable=notifications, onvalue='yes', offvalue='no')
     rec_not.place(x=190, y=305)
 
 

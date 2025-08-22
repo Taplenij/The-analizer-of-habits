@@ -10,7 +10,7 @@ sw = StopWatch()
 async def get_win_title():
     while True:
         active_window = pg.getActiveWindow()
-        return active_window.title if active_window else False
+        return active_window.title.split(' - ')[-1] if active_window else False
 
 
 async def manage_stopwatch(stop_watch: StopWatch, cur_st, next_st):
@@ -18,7 +18,7 @@ async def manage_stopwatch(stop_watch: StopWatch, cur_st, next_st):
     time_el = stop_watch.ELAPSED_TIME.format(0, 0, 0)  # Initialize from what date stopwatch will begin
     while stop_watch.FLAG and stop_watch.RUNNING:
         if cur_st and cur_st == next_st:  # If window is open and is use...
-            print(time_el)  # ...start stopwatch
+            print(f'\r{time_el}', end=' ')  # ...start stopwatch
             await asyncio.sleep(1)
             time_el = await stop_watch.increment()
             next_st = await get_win_title()  # Check if new window is open. If it is...
@@ -41,9 +41,8 @@ async def time_pos():
 #  Start stopwatch function
 async def monitor_win():
     while True:
-        window = pg.getActiveWindow()  # Catch active window
-        current_state = window.title if window else False
-        # await asyncio.sleep(1)
+        current_state = await get_win_title()  # Catch active window
+        await asyncio.sleep(1)
         print(current_state)
         await manage_stopwatch(sw, current_state, await get_win_title())  # Start stopwatch
 

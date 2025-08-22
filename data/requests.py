@@ -15,4 +15,29 @@ class DBC:
             min_size=5,
             max_size=10
         )
+        return self.pool
 
+    async def rec_activity(self, time, app, tg_id):
+        if not self.pool:
+            raise RuntimeError('Pool is not initialized')
+        async with self.pool.acquire as con:
+            await con.execute('INSERT INTO user_activity(using_time)'
+                              ' VALUE($1, $2) WHERE tg_id = VALUE($3)', time, tg_id)
+            await con.execute('UPDATE TABLE user_activity SET app = $1'
+                              ' WHERE (tg_id = $2, time = $3', app, tg_id, time)
+
+    async def rec_tg_id(self, tg_id):
+        if not self.pool:
+            raise RuntimeError('Pool is not initialized')
+        async with self.pool.acquire as con:
+            try:
+                await con.execute('INSERT INTO user_activity(tg_id) VALUE($1)', tg_id)
+            except pg.exceptions.UniqueViolationError:
+                print('This id already exists in database')
+
+# FIXME
+    async def rec_app(self, app):
+        if not self.pool:
+            raise RuntimeError('Pool is not initialized')
+        async with self.pool.acquire as con:
+            pass

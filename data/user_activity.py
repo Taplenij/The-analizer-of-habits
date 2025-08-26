@@ -1,6 +1,7 @@
 import pyautogui as pg
 import asyncio
 from stwat import StopWatch
+import queue
 
 
 sw = StopWatch()
@@ -14,14 +15,14 @@ async def get_win_title():
 
 async def manage_stopwatch(stop_watch: StopWatch, cur_st, next_st):
     stop_watch.FLAG = True  # Default FLAG value
-    time_el = stop_watch.ELAPSED_TIME.format(0, 0, 0)  # Initialize from what date stopwatch will begin
+    time_el = stop_watch.ELAPSED_TIME.format(0, 0, 1)  # Initialize from what date stopwatch will begin
     mouse_state = True
 
     async def mouse_pos():
         nonlocal mouse_state
         while True:
             pos1 = pg.position()
-            await asyncio.sleep(5)
+            await asyncio.sleep(0.0001)
             pos2 = pg.position()
             mouse_state = pos1 != pos2
 
@@ -39,14 +40,6 @@ async def manage_stopwatch(stop_watch: StopWatch, cur_st, next_st):
             await asyncio.sleep(1)
     finally:
         mouse_task.cancel()
-
-
-# Catch cursor position
-async def mouse_pos():
-    pos1 = pg.position()
-    await asyncio.sleep(5)
-    pos2 = pg.position()
-    return pos1 != pos2
 
 
 # Start stopwatch function

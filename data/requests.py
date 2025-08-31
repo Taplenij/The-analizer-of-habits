@@ -1,9 +1,13 @@
 import asyncpg as pg
+from aiogram import Bot
+from tg_bot.token import TOKEN
+
 
 
 class DBC:
     def __init__(self):
         self.pool = None
+        self.bot = Bot(token=TOKEN)
 
     async def create_pool(self):
         self.pool = pg.create_pool(
@@ -15,37 +19,43 @@ class DBC:
             min_size=5,
             max_size=10
         )
+        self.bot.pool = self.pool
         return self.pool
 
-    async def rec_activity(self, time, app, tg_id):
+    async def record_id(self, tg_id):
         if not self.pool:
-            raise RuntimeError('Pool is not initialized')
-        async with self.pool.acquire as con:
-            await con.execute('INSERT INTO user_info(using_time)'
-                              ' VALUE($1, $2) WHERE tg_id = VALUE($3)', time, tg_id)
-            await con.execute('UPDATE TABLE user_info SET app = $1'
-                              ' WHERE (tg_id = $2, time = $3', app, tg_id, time)
+            raise RuntimeError('Pool not initialized')
+        try:
+            async with self.pool.acquire as con:
+                await con.execute('INSERT INTO tg_id_info(tg_id) VALUES $1', tg_id)
+        except pg.exceptions.UniqueViolationError:
+            print('This id already in database')
 
-    async def rec_tg_id(self, tg_id):
+    async def record_activity(self, tg_id, app, time):
         if not self.pool:
-            raise RuntimeError('Pool is not initialized')
-        async with self.pool.acquire as con:
-            try:
-                await con.execute('INSERT INTO user_info(tg_id) VALUE($1)', tg_id)
-            except pg.exceptions.UniqueViolationError:
-                print('This id already exists in database')
+            raise RuntimeError('Pool not initialized')
+        try:
+            async with self.pool.acquire as con:
+                await con.execute('INSERT INTO user_info(tg_id, app, time)'
+                                  ' VALUES $1, $2, $3', tg_id, app, time)
+        except pg.exceptions.UniqueViolationError:
+            print('This record already exists')
 
-    async def rec_app(self, app):
+    async def get_info(self, tg_id):
         if not self.pool:
-            raise RuntimeError('Pool is not initialized')
+            raise RuntimeError('Pool not initialized')
         async with self.pool.acquire as con:
-            try:
-                await con.execute('INSERT INTO app_list(app_name) VALUE $1', app)
-            except pg.exceptions.UniqueViolationError:
-                print('This app is already in database')
+            info = [rec for rec in con.fetch('SELECT FROM user_info(app, time)'
+                                             ' WHERE tg_id = $1', tg_id)]
+            return info
 
-    async def remove_all(self):
+    async def increment_time(self, tg_id, time):
         if not self.pool:
-            raise RuntimeError('Pool is not initialized')
+            raise RuntimeError('Pool not initialized')
         async with self.pool.acquire as con:
-            await con.execute('DELETE FROM user_info')
+            await con.execute('UPDATE user_info SET time = time + $1 '
+                              'WHERE tg_id = $2', time, tg_id)
+
+    async def on_shutdown(self):
+        if hasattr(self.bot, 'pool') and self.bot.pool:
+            await self.bot.pool.closed()

@@ -1,18 +1,19 @@
 import pyautogui as pg
 import asyncio
 from stwat import StopWatch
+from datetime import time
+from queue import Queue
 
 
 class UserActivity:
-    def __init__(self):
-        self._stopwatch = StopWatch()
-        self._stopwatch.FLAG = True
-        self._stopwatch.RUNNING = True
-        self._INFO = dict()
-        self._next_state = None
-        self._current_state = None
-        self._elapsed_time = None
-        self._mouse_state = True
+    _STOPWATCH = StopWatch()
+    _STOPWATCH.FLAG = True
+    _STOPWATCH.RUNNING = True
+    _NEXT_STATE = None
+    _CURRENT_STATE = None
+    _ELAPSED_TIME = None
+    _MOUSE_STATE = True
+    _FIFOQ: Queue[time] = Queue()
 
     @staticmethod
     async def _get_title():
@@ -24,45 +25,49 @@ class UserActivity:
             pos1 = pg.position()
             await asyncio.sleep(5)
             pos2 = pg.position()
-            self._mouse_state = pos1 != pos2
+            self._MOUSE_STATE = pos1 != pos2
 
     async def _state_stopwatch(self):
-        if (self._stopwatch.FLAG
-                and self._stopwatch.RUNNING):
+        if (self._STOPWATCH.FLAG
+                and self._STOPWATCH.RUNNING):
             return True
         return False
 
     async def _state_machine(self):
-        if (self._current_state
-                and self._current_state == self._next_state
-                and self._mouse_state):
+        if (self._CURRENT_STATE
+                and self._CURRENT_STATE == self._NEXT_STATE
+                and self._MOUSE_STATE):
             return True
         return False
 
     async def _manage_stopwatch(self):
         mouse_task = asyncio.create_task(self._mouse_pos())
-        self._elapsed_time = self._stopwatch.ELAPSED_TIME.format(0, 0, 1)
-        self._stopwatch.FLAG = True
-        self._mouse_state = True
+        self._ELAPSED_TIME = self._STOPWATCH.ELAPSED_TIME.format(0, 0, 0)
+        self._STOPWATCH.FLAG = True
+        self._MOUSE_STATE = True
         try:
             while await self._state_stopwatch():
                 if await self._state_machine():
-                    print(f'\r{self._elapsed_time}', end=' ')
-                    self._elapsed_time = await self._stopwatch.increment()
-                    self._next_state = await self._get_title()
+                    print(f'\r{self._ELAPSED_TIME}', end=' ')
+                    self._ELAPSED_TIME = await self._STOPWATCH.increment()
+                    self._NEXT_STATE = await self._get_title()
                 else:
-                    self._stopwatch.FLAG = False
-                    await self._stopwatch.stop()
+                    cur_t = time(**await self._STOPWATCH.grab_current_time())
+                    self._FIFOQ.put(cur_t, block=False)
+                    self._STOPWATCH.FLAG = False
+                    await self._STOPWATCH.stop()
                 await asyncio.sleep(1)
         finally:
             mouse_task.cancel()
+            while not self._FIFOQ.empty():
+                return self._FIFOQ.get(block=False)
 
     async def monitor_window(self):
         while True:
-            self._current_state = await self._get_title()
-            self._next_state = await self._get_title()
-            print(self._current_state)
-            await self._manage_stopwatch()
+            self._CURRENT_STATE = await self._get_title()
+            self._NEXT_STATE = await self._get_title()
+            print(self._CURRENT_STATE)
+            return await self._manage_stopwatch()
 
 
 async def main():

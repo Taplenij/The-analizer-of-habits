@@ -2,6 +2,9 @@ from PIL import ImageGrab
 import pytesseract as ts
 import time
 
+soc_net = ['discord', 'tiktok', 'snapchat', 'youtube',
+           'viber', 'facebook', 'vk', 'telegram', 'instagram']
+
 
 def read_text_from_win():
     time.sleep(2)

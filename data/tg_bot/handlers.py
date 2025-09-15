@@ -19,6 +19,6 @@ async def com_start(message: Message):
     await req.record_id(message.from_user.id)
 
 
-@router.message(F.text.lower() == 'сосал?')  # Sexy secret
+@router.message(F.TEXT.lower() == 'сосал?')  # Sexy secret
 async def sosal(message: Message):
     await message.reply('Да')

@@ -1,21 +1,22 @@
 from PIL import ImageGrab
-import pytesseract as ts
+import pytesseract
 import time
-
-soc_net = ['discord', 'tiktok', 'snapchat', 'youtube',
-           'viber', 'facebook', 'vk', 'telegram', 'instagram']
+import re
 
 
-def read_text_from_win():
-    time.sleep(2)
-    image = ImageGrab.grab(bbox=(200, 40, 500, 70))
-    image.save('test.jpg')
-    text = ts.image_to_string(image)
-    print(text)
+class ComputerVision:
+    SOC_NET = ['discord', 'tiktok', 'snapchat', 'youtube',
+               'viber', 'facebook', 'vk', 'telegram', 'instagram']
+    TEXT = None
 
+    def read_text_from_win(self):
+        time.sleep(2)
+        image = ImageGrab.grab(bbox=(200, 40, 1500, 70))
+        image.save('test.jpg')
+        self.TEXT = pytesseract.image_to_string(image)
 
-def active_win_info():
-    pass
+    def active_win_info(self):
+        pass
 
-
-read_text_from_win()
+c = ComputerVision()
+c.active_win_info()

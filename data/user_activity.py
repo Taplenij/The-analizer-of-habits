@@ -3,7 +3,23 @@ import asyncio
 from stwat import StopWatch
 from datetime import time
 from queue import Queue
+import logging
 
+import computer_vision as cv
+
+log = logging.getLogger('user_activity')
+log.setLevel(logging.DEBUG )
+ch = logging.StreamHandler()
+
+formatter = logging.Formatter(
+    fmt='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S'
+)
+
+ch.setFormatter(formatter)
+log.addHandler(ch)
+
+COMV = cv.ComputerVision()
 
 class UserActivity:
     _STOPWATCH = StopWatch()
@@ -64,15 +80,22 @@ class UserActivity:
 
     async def monitor_window(self):
         while True:
-            self._CURRENT_STATE = await self._get_title()
-            self._NEXT_STATE = await self._get_title()
-            print(self._CURRENT_STATE)
+            if not COMV.IS_SOC:
+                self._CURRENT_STATE = await self._get_title()
+                self._NEXT_STATE = await self._get_title()
+                log.info(self._CURRENT_STATE)
+            else:
+                await COMV.active_win_info()
+                self._CURRENT_STATE = COMV.TEXT
+                self._NEXT_STATE = COMV.TEXT
+                log.info(self._CURRENT_STATE)
             return await self._manage_stopwatch()
 
 
 async def main():
     user_activity = UserActivity()
     monitor_window = asyncio.create_task(user_activity.monitor_window())
+    computer_vision = asyncio.create_task(COMV.active_win_info())
     try:
         while True:
             await asyncio.sleep(1)

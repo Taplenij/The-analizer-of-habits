@@ -76,26 +76,31 @@ class UserActivity:
         finally:
             mouse_task.cancel()
             while not self._FIFOQ.empty():
-                return self._FIFOQ.get(block=False)
+                log.info(self._FIFOQ.get(block=False))
 
     async def monitor_window(self):
+        computer_vision_task = asyncio.create_task(COMV.active_win_info())
+        log.info('Computer Vision started')
         while True:
-            if not COMV.IS_SOC:
-                self._CURRENT_STATE = await self._get_title()
-                self._NEXT_STATE = await self._get_title()
-                log.info(self._CURRENT_STATE)
-            else:
-                await COMV.active_win_info()
-                self._CURRENT_STATE = COMV.TEXT
-                self._NEXT_STATE = COMV.TEXT
-                log.info(self._CURRENT_STATE)
-            return await self._manage_stopwatch()
+            try:
+                if COMV.IS_SOC:
+                    log.info('Soc Net was detected')
+                    self._CURRENT_STATE = COMV.TEXT
+                    self._NEXT_STATE = COMV.TEXT
+                    log.info(self._CURRENT_STATE)
+                else:
+                    log.info('Soc Net was not detected')
+                    self._CURRENT_STATE = await self._get_title()
+                    self._NEXT_STATE = await self._get_title()
+                    log.info(self._CURRENT_STATE)
+            finally:
+                computer_vision_task.cancel()
+                await self._manage_stopwatch()
 
 
 async def main():
     user_activity = UserActivity()
     monitor_window = asyncio.create_task(user_activity.monitor_window())
-    computer_vision = asyncio.create_task(COMV.active_win_info())
     try:
         while True:
             await asyncio.sleep(1)

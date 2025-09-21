@@ -32,16 +32,20 @@ class ComputerVision:
             log.info('Shutting down')
 
     async def active_win_info(self):
-        while True:
+        try:
+            log.info('Computer Vision started')
             await self._read_text_from_win()
             if not self.TEXT:
                 log.info('Text is empty')
             else:
                 find_text = re.findall(r'(?:\w+\.)+\w+', self.TEXT)
                 find_text = (' '.join(find_text)).split('.')[1]
-                log.info(find_text)
-                if find_text in self.SOC_NET:
-                    log.info(f'Found SOC NET {find_text}')
+                self.TEXT = find_text
+                log.info(self.TEXT)
+                if self.TEXT in self.SOC_NET:
+                    log.info(f'Found SOC NET {self.TEXT}')
                     self.IS_SOC = True
                 else:
-                    log.info(f'Found TEXT {find_text}')
+                    log.info(f'Found TEXT {self.TEXT}')
+        except Exception as e:
+            log.error(e)

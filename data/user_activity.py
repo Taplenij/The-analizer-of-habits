@@ -29,7 +29,10 @@ class UserActivity:
     _CURRENT_STATE = None
     _ELAPSED_TIME = None
     _MOUSE_STATE = True
+    _SOC_NET_STATE = None
     _FIFOQ: Queue[time] = Queue()
+    _BROWSERS = ['Opera', 'Google Chrome', 'Google',
+                'Microsoft Edge', 'Firefox', 'Safari', 'Yandex']
 
     @staticmethod
     async def _get_title():
@@ -79,23 +82,25 @@ class UserActivity:
                 log.info(self._FIFOQ.get(block=False))
 
     async def monitor_window(self):
-        computer_vision_task = asyncio.create_task(COMV.active_win_info())
-        log.info('Computer Vision started')
         while True:
             try:
-                if COMV.IS_SOC:
-                    log.info('Soc Net was detected')
-                    self._CURRENT_STATE = COMV.TEXT
-                    self._NEXT_STATE = COMV.TEXT
-                    log.info(self._CURRENT_STATE)
-                else:
-                    log.info('Soc Net was not detected')
-                    self._CURRENT_STATE = await self._get_title()
-                    self._NEXT_STATE = await self._get_title()
-                    log.info(self._CURRENT_STATE)
-            finally:
-                computer_vision_task.cancel()
+                start_title = await self._get_title()
+                if start_title in self._BROWSERS:
+                    await COMV.active_win_info()
+                    log.info(COMV.TEXT)
+                    if COMV.IS_SOC:
+                        log.info('Soc Net was detected')
+                        self._CURRENT_STATE = COMV.TEXT
+                        self._NEXT_STATE = COMV.TEXT
+                        log.info(self._CURRENT_STATE)
+                        await self._state_stopwatch()
+                log.info('Soc Net was not detected')
+                self._CURRENT_STATE = start_title
+                self._NEXT_STATE = start_title
+                log.info(self._CURRENT_STATE)
                 await self._manage_stopwatch()
+            except Exception as e:
+                log.error(e)
 
 
 async def main():

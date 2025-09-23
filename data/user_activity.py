@@ -29,15 +29,22 @@ class UserActivity:
     _CURRENT_STATE = None
     _ELAPSED_TIME = None
     _MOUSE_STATE = True
-    _SOC_NET_STATE = None
     _FIFOQ: Queue[time] = Queue()
-    _BROWSERS = ['Opera', 'Google Chrome', 'Google',
-                'Microsoft Edge', 'Firefox', 'Safari', 'Yandex']
+    _BROWSERS = {'Opera':'Opera', 'Chrome':'Google Chrome',
+                 'Edge':'Microsoft Edge', 'Safari':'Safari'}
 
     @staticmethod
     async def _get_title():
         active_window = pg.getActiveWindow()
-        return active_window.title.split(' - ')[-1] if active_window else False
+        return active_window.title.split()[-1] if active_window else False
+
+    async def _check_soc(self):
+        name_title = await self._get_title()
+        if name_title in self._BROWSERS:
+            await COMV.active_win_info()
+            return COMV.TEXT
+        else:
+            return name_title
 
     async def _mouse_pos(self):
         while True:
@@ -69,7 +76,7 @@ class UserActivity:
                 if await self._state_machine():
                     print(f'\r{self._ELAPSED_TIME}', end=' ')
                     self._ELAPSED_TIME = await self._STOPWATCH.increment()
-                    self._NEXT_STATE = await self._get_title()
+                    self._NEXT_STATE = await self._check_soc()
                 else:
                     cur_t = time(**await self._STOPWATCH.grab_current_time())
                     self._FIFOQ.put(cur_t, block=False)
@@ -84,17 +91,7 @@ class UserActivity:
     async def monitor_window(self):
         while True:
             try:
-                start_title = await self._get_title()
-                if start_title in self._BROWSERS:
-                    await COMV.active_win_info()
-                    log.info(COMV.TEXT)
-                    if COMV.IS_SOC:
-                        log.info('Soc Net was detected')
-                        self._CURRENT_STATE = COMV.TEXT
-                        self._NEXT_STATE = COMV.TEXT
-                        log.info(self._CURRENT_STATE)
-                        await self._state_stopwatch()
-                log.info('Soc Net was not detected')
+                start_title = await self._check_soc()
                 self._CURRENT_STATE = start_title
                 self._NEXT_STATE = start_title
                 log.info(self._CURRENT_STATE)

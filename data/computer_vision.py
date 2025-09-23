@@ -17,11 +17,7 @@ ch.setFormatter(formatter)
 log.addHandler(ch)
 
 class ComputerVision:
-    SOC_NET = ['discord', 'tiktok', 'snapchat', 'youtube',
-               'viber', 'facebook', 'vk',
-               'telegram', 'instagram']
     TEXT = None
-    IS_SOC = False
 
     async def _read_text_from_win(self):
         try:
@@ -33,19 +29,13 @@ class ComputerVision:
 
     async def active_win_info(self):
         try:
-            log.info('Computer Vision started')
             await self._read_text_from_win()
             if not self.TEXT:
                 log.info('Text is empty')
             else:
-                find_text = re.findall(r'(?:\w+\.)+\w+', self.TEXT)
-                find_text = (' '.join(find_text)).split('.')[1]
+                find_text = re.findall(r'(?:https?://)?(?:www\.)?([a-zA-Z0-9.-]+)(?:/[^\s]*)?', self.TEXT)
+                find_text = (''.join(find_text)).split('.')[0]
                 self.TEXT = find_text
-                log.info(self.TEXT)
-                if self.TEXT in self.SOC_NET:
-                    log.info(f'Found SOC NET {self.TEXT}')
-                    self.IS_SOC = True
-                else:
-                    log.info(f'Found TEXT {self.TEXT}')
+                log.info(f'Text found: {self.TEXT}')
         except Exception as e:
             log.error(e)

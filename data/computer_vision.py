@@ -1,5 +1,4 @@
 from PIL import ImageGrab
-import asyncio
 import pytesseract
 import logging
 import re

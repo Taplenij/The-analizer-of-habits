@@ -41,7 +41,7 @@ class UserActivity:
     async def _check_soc(self):
         name_title = await self._get_title()
         if name_title in self._BROWSERS: # If it's browser...
-            await COMV.active_win_info() # ...we check what browser is
+            await COMV.active_win_info() # ...we check what link was opened
             return COMV.TEXT
         else:
             return name_title # If it's not a browser, return founded title

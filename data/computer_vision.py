@@ -20,7 +20,7 @@ class ComputerVision:
 
     async def _read_text_from_win(self):
         try:
-            image = ImageGrab.grab(bbox=(200, 40, 1500, 70))
+            image = ImageGrab.grab(bbox=(100, 40, 1500, 70))
             image.save('test.jpg')
             self.TEXT = pytesseract.image_to_string(image)
         except KeyboardInterrupt:

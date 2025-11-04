@@ -1,23 +1,23 @@
 import pyautogui as pg
 import asyncio
-from stwat import StopWatch
+from data.stwat import StopWatch
 from datetime import time
 from queue import Queue
 import logging
 
-import computer_vision as cv
+import data.computer_vision as cv
 
 log = logging.getLogger('user_activity')
 log.setLevel(logging.DEBUG )
-ch = logging.StreamHandler()
+sh = logging.StreamHandler()
 
 formatter = logging.Formatter(
     fmt='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     datefmt='%Y-%m-%d %H:%M:%S'
 )
 
-ch.setFormatter(formatter)
-log.addHandler(ch)
+sh.setFormatter(formatter)
+log.addHandler(sh)
 
 COMV = cv.ComputerVision()
 
@@ -102,20 +102,4 @@ class UserActivity:
             except Exception as e:
                 log.error(e)
 
-
-async def main():
-    user_activity = UserActivity()
-    monitor_window = asyncio.create_task(user_activity.monitor_window())
-    try:
-        while True:
-            await asyncio.sleep(1)
-    except KeyboardInterrupt:
-        monitor_window.cancel()
-        print('interrupted')
-    except Exception as e:
-        print(f'EXCEPTION {e}')
-try:
-    asyncio.run(main())
-except KeyboardInterrupt:
-    print('leave')
 # А НА МНЕ СУКА НА ЯХТЕ Э!

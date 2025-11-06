@@ -3,15 +3,17 @@ import pyprind
 from sentence_transformers import SentenceTransformer
 from data.classification.data_clf import dict_apps
 
+models = ['paraphrase-MiniLM-L12-v2', 'distiluse-base-multilingual-cased']
+emb_l = []
 df = pd.DataFrame()
 pg = pyprind.ProgBar(iterations=304)
-transformer = SentenceTransformer('paraphrase-MiniLM-L12-v2')
-
-for l in dict_apps:
-    for n in dict_apps[l]:
-        embeddings = transformer.encode(n)
-        df = df._append([[l, *embeddings]], ignore_index=True)
-        pg.update()
+for model in models:
+    transformer = SentenceTransformer(model)
+    for l in dict_apps:
+        for n in dict_apps[l]:
+            embeddings = transformer.encode(n)
+            df = df._append([[l, *embeddings]], ignore_index=True)
+            pg.update()
 
 df.columns = ['category', *[f'values{i}' for i in range(1, 385)]]
 

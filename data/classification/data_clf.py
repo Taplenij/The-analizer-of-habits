@@ -64,7 +64,7 @@ games_apps = [
     "The Witcher 3", "Red Dead Redemption 2", "Skyrim", "Valorant Mobile", "World of Tanks"
 ]
 
-categories = ['Игры', 'Развлечение', 'Образование', 'Работа', 'Система', 'Другое']
+categories = ['Games', 'Entertainments', 'Education', 'Work', 'System', 'Other']
 
 dict_apps = {k: v for k, v in zip(categories, [games_apps, entertainment_apps,
                                                education_apps,work_apps,

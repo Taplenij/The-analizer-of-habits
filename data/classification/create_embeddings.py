@@ -4,7 +4,7 @@ from sentence_transformers import SentenceTransformer
 from data.classification.data_clf import dict_apps
 
 models = ['paraphrase-MiniLM-L12-v2', 'distiluse-base-multilingual-cased']
-emb_l = []
+embd = []
 df = pd.DataFrame()
 pg = pyprind.ProgBar(iterations=304)
 for model in models:

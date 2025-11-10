@@ -10,8 +10,8 @@ class DBC:
 
     async def create_pool(self):
         self.pool = await pg.create_pool(
-            user='postgres',
-            password='password',
+            user='--',
+            password='--',
             database='analizer_of_habits',
             host='localhost',
             port='5432',

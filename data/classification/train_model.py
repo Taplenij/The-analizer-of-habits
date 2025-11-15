@@ -42,11 +42,14 @@ def check_stats_for_several_models(clf, method):
             pipe = make_pipeline(StandardScaler(), LDA(n_components=5))
             X_train_lda = pipe.fit_transform(X_train, y_train)
             X_test_lda = pipe.transform(X_test)
+            print(f'Score info with {table}')
             get_score_info(clf, X_train_lda, y_train, X_test_lda, y_test)
         elif method == 'pipeline':
             pipe = make_pipeline(StandardScaler(), LDA(n_components=5), clf)
+            print(f'Score info with {table}')
             get_score_info(pipe, X_train, y_train, X_test, y_test)
-
+        else:
+            raise ValueError('Method parameter must be hand or pipeline')
 #
 # rfc = RandomForestClassifier(criterion='gini', max_depth=10,
 #                              max_leaf_nodes=10, min_impurity_decrease=0.0001,

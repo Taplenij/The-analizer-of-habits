@@ -19,7 +19,9 @@ importance_feat = np.array([])
 feat_labels = df.columns[1:]
 importances = rfc.feature_importances_
 indices = np.argsort(importances)[::-1]
-for f in range(X.shape[0]):
+for f in range(X.shape[1]):
     if importances[f] != 0.0:
         importance_feat = np.append(importance_feat, feat_labels[f])
+print(importance_feat)
+print(importance_feat.shape)
 np.save('new_selection', importance_feat)

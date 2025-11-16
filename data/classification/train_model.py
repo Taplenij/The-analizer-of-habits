@@ -68,3 +68,6 @@ rfc = RandomForestClassifier(criterion='gini', max_depth=10,
                              min_samples_split=5, min_samples_leaf=5,
                              n_estimators=50)
 
+check_stats_for_several_models(rfc, method='hands')
+print('**' * 50)
+check_stats_for_several_models(rfc, method='pipeline')

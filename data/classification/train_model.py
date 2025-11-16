@@ -7,15 +7,17 @@ from sklearn.preprocessing import LabelEncoder, StandardScaler
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
 from sklearn.metrics import accuracy_score
 from sklearn.pipeline import make_pipeline, Pipeline
-from sklearn.tree import DecisionTreeClassifier
+
+features_columns = np.load('new_selection.npy')
 
 df = pd.read_csv('tables/model_app_data_multi-qa-mpnet-base-cos-v1.csv')
-X = df.iloc[:, 1:].values
+
+X = df[features_columns].values
 y = df.iloc[:, 0].values
 le = LabelEncoder()
 y = le.fit_transform(y)
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, stratify=y,
-                                                    shuffle=True, random_state=1)
+X_train, X_test, y_train, y_test = train_test_split(X, y, shuffle=True,
+                                                    stratify=y, random_state=1)
 
 def get_score_info(clf, X_train, y_train, X_test, y_test):
     cv_score = cross_val_score(clf, X_train, y_train, cv=10, n_jobs=1)
@@ -61,19 +63,8 @@ def check_stats_for_several_models(clf, method):
         else:
             raise ValueError('Method parameter must be hand or pipeline')
 # RANDOM FOREST
-# rfc = RandomForestClassifier(criterion='gini', max_depth=10,
-#                              max_leaf_nodes=10, min_impurity_decrease=0.0001,
-#                              min_samples_split=5, min_samples_leaf=5,
-#                              n_estimators=50)
-# check_stats_for_several_models(rfc, 'hands')
-# print('**' * 50)
-# check_stats_for_several_models(rfc, 'pipeline')
-
-#BAGGING
-tree = DecisionTreeClassifier(criterion='entropy', max_depth=10, random_state=1)
-bag = BaggingClassifier(estimator=tree, max_features=1.0, max_samples=1.0,
-                        bootstrap=True, bootstrap_features=False, n_jobs=1)
-check_stats_for_several_models(bag, 'hands')
-print('**' * 50)
-check_stats_for_several_models(bag, 'pipeline')
+rfc = RandomForestClassifier(criterion='gini', max_depth=10,
+                             max_leaf_nodes=10, min_impurity_decrease=0.0001,
+                             min_samples_split=5, min_samples_leaf=5,
+                             n_estimators=50)
 

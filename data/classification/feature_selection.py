@@ -24,4 +24,4 @@ for f in range(X.shape[1]):
         importance_feat = np.append(importance_feat, feat_labels[f])
 print(importance_feat)
 print(importance_feat.shape)
-np.save('new_selection', importance_feat)
+# np.save('new_selection', importance_feat)

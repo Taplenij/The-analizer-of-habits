@@ -6,6 +6,7 @@ from sklearn.model_selection import GridSearchCV, train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import LabelEncoder
 from sklearn.ensemble import RandomForestClassifier
+from data.classification.help_functions import get_score_info
 
 df = pd.read_csv('clear_data.csv')
 
@@ -17,7 +18,8 @@ y = le.fit_transform(y)
 X_train, X_test, y_train, y_test = train_test_split(X, y, stratify=y,
                                                     shuffle=True, random_state=1)
 
-tfidf = TfidfVectorizer(strip_accents=None,
+tfidf = TfidfVectorizer(ngram_range=(1, 1), norm='l2', use_idf=False,
+                        strip_accents=None,
                         lowercase=False,
                         preprocessor=None)
 
@@ -34,10 +36,16 @@ param_grid = [{
     'clf__n_estimators': [10, 50, 100, 200]
 }]
 
-tree = RandomForestClassifier()
+tree = RandomForestClassifier(criterion='entropy', max_depth=15,
+                              max_leaf_nodes=20, min_impurity_decrease=0.0001,
+                              min_samples_leaf=5, min_samples_split=5,
+                              n_estimators=50, random_state=1)
+
 pipe_tfidf = Pipeline([('vect', tfidf), ('clf', tree)])
-gs = GridSearchCV(pipe_tfidf, param_grid=param_grid, refit=True,
-                  scoring='accuracy', cv=10, n_jobs=-1)
-gs.fit(X_train, y_train)
-print(gs.best_params_)
-print(gs.best_score_)
+# gs = GridSearchCV(pipe_tfidf, param_grid=param_grid, refit=True,
+#                   scoring='accuracy', cv=10, n_jobs=-1)
+# gs.fit(X_train, y_train)
+# print(gs.best_params_)
+# print(gs.best_score_)
+
+get_score_info(pipe_tfidf, X_train, y_train, X_test, y_test)

@@ -51,3 +51,6 @@ def check_stats_for_several_models(clf, method):
             print('--' * 50)
         else:
             raise ValueError('Method parameter must be hand or pipeline')
+
+def preproc(text):
+    return text.replace(' ', '_')

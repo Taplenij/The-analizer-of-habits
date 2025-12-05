@@ -54,7 +54,7 @@ other_apps = [
 
 games_apps = [
     "Minecraft", "Among Us", "Clash of Clans", "Clash Royale", "PUBG Mobile", "Call of Duty Mobile",
-    "Genshin Impact", "Apex Legends Mobile", "Brawl Stars", "Free Fire", "League of Legends",
+    "Genshin Impact", "Brawl Stars", "Free Fire", "League of Legends",
     "Valorant", "Counter-Strike 2", "Dota 2", "Overwatch 2", "Rocket League", "The Sims 4",
     "GTA V", "Cyberpunk 2077", "Elden Ring", "Baldur’s Gate 3", "Honkai Star Rail",
     "Candy Crush Saga", "Subway Surfers", "Temple Run", "Angry Birds", "Plants vs Zombies",

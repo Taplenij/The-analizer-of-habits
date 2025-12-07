@@ -1,3 +1,4 @@
+import re
 import numpy as np
 import os
 import pandas as pd
@@ -7,6 +8,11 @@ from sklearn.preprocessing import StandardScaler, LabelEncoder
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline, make_pipeline
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
+from nltk.corpus import stopwords
+from nltk.stem.porter import PorterStemmer
+
+stop = stopwords.words('english')
+porter = PorterStemmer()
 
 def get_score_info(clf, X_train, y_train, X_test, y_test):
     cv_score = cross_val_score(clf, X_train, y_train, cv=10, n_jobs=1)
@@ -54,3 +60,14 @@ def check_stats_for_several_models(clf, method):
 
 def preproc(text):
     return text.replace(' ', '_')
+
+def preprocessor(text):
+    text = re.sub(r'[^\w\s]', '', text)
+    tokenized = [w for w in text.split() if w not in stop]
+    return tokenized
+
+def tokenizer(text):
+    return text.split()
+
+def tokenizer_porter(text):
+    return [porter.stem(word) for word in text.split()]

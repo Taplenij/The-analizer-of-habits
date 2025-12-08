@@ -9,8 +9,6 @@ from sklearn.pipeline import make_pipeline, Pipeline
 from data.classification.help_functions import (get_score_info, check_stats_for_several_models,
                                                 preprocessor, tokenizer, tokenizer_porter)
 
-features_columns = np.load('new_selection.npy')
-
 df = pd.read_csv('tables/text_data.csv')
 
 X = df['DataText'].values
@@ -22,33 +20,42 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3,
                                                     random_state=1)
 
 param_grid = [
-    {'vect__n_gram_range': [(1, 1)],
+    {'vect__ngram_range': [(1, 1)],
      'vect__stop_words': ['stop', None],
      'vect__tokenizer': [tokenizer, tokenizer_porter],
-     'vect__norm': ['l1'],
+     'vect__norm': ['l1', 'l2'],
 
      'clf__criterion': ['gini', 'entropy'],
-     'clf_n_estimators': [10, 20, 50, 100, 500],
+     'clf__n_estimators': [10, 20, 50, 100, 500],
      'clf__max_depth': [5, 10, 15, 20, 50],
      'clf__max_leaf_nodes': [5, 10, 15, 20],
-     'clf__min_impurity_decrease': [0.0001, 0.001, 0.01, 0.1],
+     'clf__min_impurity_decrease': [0.0001, 0.001, 0.1],
      'clf__min_samples_split': [5, 10, 15, 20],
      'clf__min_samples_leaf': [5, 10, 15, 20]},
 
-    {'vect__n_gram_range': [(1, 1)],
-     'vect__stop_words': ['stop', None],
+
+    {'vect__ngram_range': [(1, 1)],
+     'vect__stop_words': ['english', None],
      'vect__tokenizer': [tokenizer, tokenizer_porter],
      'vect__use_idf': [False],
-     'vect_norm': [None],
+     'vect__norm': [None],
 
      'clf__criterion': ['gini', 'entropy'],
-     'clf_n_estimators': [10, 20, 50, 100, 500],
+     'clf__n_estimators': [10, 20, 50, 100, 500],
      'clf__max_depth': [5, 10, 15, 20, 50],
      'clf__max_leaf_nodes': [5, 10, 15, 20],
-     'clf__min_impurity_decrease': [0.0001, 0.001, 0.01, 0.1],
+     'clf__min_impurity_decrease': [0.0001, 0.001, 0.1],
      'clf__min_samples_split': [5, 10, 15, 20],
      'clf__min_samples_leaf': [5, 10, 15, 20]}
 ]
+
+rfc = RandomForestClassifier(random_state=1)
+tfidf = TfidfVectorizer(strip_accents=None, lowercase=True, preprocessor=preprocessor)
+pipe = Pipeline([('vect', tfidf), ('clf', rfc)])
+gd = GridSearchCV(pipe, param_grid=param_grid, scoring='accuracy', refit=False, cv=10, n_jobs=-1)
+gd.fit(X_train, y_train)
+print(gd.best_params_)
+print(gd.best_score_)
 
 # FOR EMBEDDING MODELS
 # X = df.iloc[:, 2].values

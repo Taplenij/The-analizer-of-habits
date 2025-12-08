@@ -6,7 +6,6 @@ import pyprind
 
 df = pd.DataFrame()
 user_agent = 'Analizer_of_habits/1.0 (https://github.com/Taplenij/The-analizer-of-habits.git)'
-
 headers = {
     'User-Agent' : user_agent
 }
@@ -21,9 +20,14 @@ for l in dict_apps:
                                     'DataText': addit_data[name]}])
         else:
             text = r.json()
-            new_row_df = pd.DataFrame([{'Category': l,
+            if len(text.get('extract', '')) < 50:
+                new_row_df = pd.DataFrame([{'Category': l,
                                         'AppName': name,
-                                        'DataText': text.get('extract', '')}])
+                                        'DataText': addit_data[name]}])
+            else:
+                new_row_df = pd.DataFrame([{'Category': l,
+                                            'AppName': name,
+                                            'DataText': text.get('extract', '')}])
         df = pd.concat([df, new_row_df], ignore_index=True)
         pgb.update()
 df.columns = ['Category', 'AppName', 'DataText']

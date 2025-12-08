@@ -4,7 +4,6 @@ import pandas as pd
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
-from data.classification.SequentialBackwardSelection import SBS
 
 df = pd.read_csv('tables/model_app_data_multi-qa-mpnet-base-cos-v1.csv')
 X = df.iloc[:, 1:].values
@@ -29,13 +28,3 @@ rfc = RandomForestClassifier(criterion='gini', max_depth=10,
 # print(importance_feat)
 # print(importance_feat.shape)
 # np.save('new_selection', importance_feat)
-
-sbs = SBS(rfc, k_features=1)
-sbs.fit(X_std, y)
-k_feat = [len(k) for k in sbs.subsets_]
-plt.plot(k_feat, sbs.scores_, marker='o')
-plt.xlabel('Feature quantity')
-plt.ylabel('Correctness')
-plt.grid()
-plt.tight_layout()
-plt.show()

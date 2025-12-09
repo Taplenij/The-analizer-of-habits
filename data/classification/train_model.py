@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.svm import SVC
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.preprocessing import LabelEncoder, StandardScaler
@@ -19,43 +20,35 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3,
                                                     shuffle=True, stratify=y,
                                                     random_state=1)
 
-param_grid = [
-    {'vect__ngram_range': [(1, 1)],
-     'vect__stop_words': ['stop', None],
-     'vect__tokenizer': [tokenizer, tokenizer_porter],
-     'vect__norm': ['l1', 'l2'],
+clf = SVC(random_state=1, kernel='linear', C=1.0, gamma=0.1)
+tfidf = TfidfVectorizer(strip_accents=None, lowercase=True, preprocessor=preprocessor,
+                        ngram_range=(1, 1), stop_words=None, tokenizer=tokenizer_porter)
 
-     'clf__criterion': ['gini', 'entropy'],
-     'clf__n_estimators': [10, 20, 50, 100, 500],
-     'clf__max_depth': [5, 10, 15, 20, 50],
-     'clf__max_leaf_nodes': [5, 10, 15, 20],
-     'clf__min_impurity_decrease': [0.0001, 0.001, 0.1],
-     'clf__min_samples_split': [5, 10, 15, 20],
-     'clf__min_samples_leaf': [5, 10, 15, 20]},
+X_train_v = tfidf.fit_transform(X_train)
+X_test_v = tfidf.transform(X_test)
+clf.fit(X_train_v, y_train)
+print('Accuracy svc = ', clf.score(X_test_v, y_test))
+
+# {'clf__C': 1.0, 'clf__gamma': 0.1, 'clf__kernel': 'linear',
+# 'vect__ngram_range': (1, 1), 'vect__stop_words': None,
+# 'vect__tokenizer': <function tokenizer_porter at 0x00000171C195B9C0>}
+# 0.7738095238095237
 
 
-    {'vect__ngram_range': [(1, 1)],
-     'vect__stop_words': ['english', None],
-     'vect__tokenizer': [tokenizer, tokenizer_porter],
-     'vect__use_idf': [False],
-     'vect__norm': [None],
+rfc = RandomForestClassifier(random_state=1, criterion='gini', n_estimators=100,
+                             max_leaf_nodes=15, min_impurity_decrease=0.0001,
+                             min_samples_leaf=5, min_samples_split=5, max_depth=10)
+tfidf = TfidfVectorizer(strip_accents=None, lowercase=True, preprocessor=preprocessor,
+                        ngram_range=(1,1), norm=None, stop_words='english', tokenizer=tokenizer_porter)
 
-     'clf__criterion': ['gini', 'entropy'],
-     'clf__n_estimators': [10, 20, 50, 100, 500],
-     'clf__max_depth': [5, 10, 15, 20, 50],
-     'clf__max_leaf_nodes': [5, 10, 15, 20],
-     'clf__min_impurity_decrease': [0.0001, 0.001, 0.1],
-     'clf__min_samples_split': [5, 10, 15, 20],
-     'clf__min_samples_leaf': [5, 10, 15, 20]}
-]
+X_train_v = tfidf.fit_transform(X_train)
+X_test_v = tfidf.transform(X_test)
+rfc.fit(X_train_v, y_train)
+print('Accuracy rfc = ', rfc.score(X_test_v, y_test))
 
-rfc = RandomForestClassifier(random_state=1)
-tfidf = TfidfVectorizer(strip_accents=None, lowercase=True, preprocessor=preprocessor)
-pipe = Pipeline([('vect', tfidf), ('clf', rfc)])
-gd = GridSearchCV(pipe, param_grid=param_grid, scoring='accuracy', refit=False, cv=10, n_jobs=-1)
-gd.fit(X_train, y_train)
-print(gd.best_params_)
-print(gd.best_score_)
+# TFIDF WITH RANDOM FOREST
+# 'vect__ngram_range': (1, 1), 'vect__norm': None, 'vect__stop_words': 'english',
+# 'vect__tokenizer': <function tokenizer_porter at 0x000002544D88F9C0>, 'vect__use_idf': False
 
 # FOR EMBEDDING MODELS
 # X = df.iloc[:, 2].values

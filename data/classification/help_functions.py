@@ -14,7 +14,7 @@ from nltk.stem.porter import PorterStemmer
 stop = stopwords.words('english')
 porter = PorterStemmer()
 
-def get_score_info(clf, X_train, y_train, X_test, y_test):
+def get_score_info(clf, X_train, X_test, y_train, y_test):
     cv_score = cross_val_score(clf, X_train, y_train, cv=10, n_jobs=1)
     clf.fit(X_train, y_train)
     y_pred = clf.predict(X_test)
@@ -70,4 +70,4 @@ def tokenizer(text):
     return text.split()
 
 def tokenizer_porter(text):
-    return [porter.stem(word) for word in text.split()]
+    return [porter.stem(word) for word in text]

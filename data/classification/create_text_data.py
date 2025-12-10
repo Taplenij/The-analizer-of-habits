@@ -9,7 +9,7 @@ user_agent = 'Analizer_of_habits/1.0 (https://github.com/Taplenij/The-analizer-o
 headers = {
     'User-Agent' : user_agent
 }
-pgb = pyprind.ProgBar(iterations=304)
+pgb = pyprind.ProgBar(iterations=603)
 for l in dict_apps:
     for name in dict_apps[l]:
         r = requests.get(f'https://en.wikipedia.org/api/rest_v1/page/summary/{preproc(name)}',

@@ -26,29 +26,7 @@ tfidf = TfidfVectorizer(strip_accents=None, lowercase=True, preprocessor=preproc
 
 X_train_v = tfidf.fit_transform(X_train)
 X_test_v = tfidf.transform(X_test)
-clf.fit(X_train_v, y_train)
-print('Accuracy svc = ', clf.score(X_test_v, y_test))
-
-# {'clf__C': 1.0, 'clf__gamma': 0.1, 'clf__kernel': 'linear',
-# 'vect__ngram_range': (1, 1), 'vect__stop_words': None,
-# 'vect__tokenizer': <function tokenizer_porter at 0x00000171C195B9C0>}
-# 0.7738095238095237
-
-
-rfc = RandomForestClassifier(random_state=1, criterion='gini', n_estimators=100,
-                             max_leaf_nodes=15, min_impurity_decrease=0.0001,
-                             min_samples_leaf=5, min_samples_split=5, max_depth=10)
-tfidf = TfidfVectorizer(strip_accents=None, lowercase=True, preprocessor=preprocessor,
-                        ngram_range=(1,1), norm=None, stop_words='english', tokenizer=tokenizer_porter)
-
-X_train_v = tfidf.fit_transform(X_train)
-X_test_v = tfidf.transform(X_test)
-rfc.fit(X_train_v, y_train)
-print('Accuracy rfc = ', rfc.score(X_test_v, y_test))
-
-# TFIDF WITH RANDOM FOREST
-# 'vect__ngram_range': (1, 1), 'vect__norm': None, 'vect__stop_words': 'english',
-# 'vect__tokenizer': <function tokenizer_porter at 0x000002544D88F9C0>, 'vect__use_idf': False
+get_score_info(clf, X_train_v, X_test_v, y_train, y_test)
 
 # FOR EMBEDDING MODELS
 # X = df.iloc[:, 2].values
@@ -71,3 +49,4 @@ print('Accuracy rfc = ', rfc.score(X_test_v, y_test))
 # check_stats_for_several_models(rfc, 'hands')
 # print('**' * 50)
 # check_stats_for_several_models(rfc, 'pipeline')
+

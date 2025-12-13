@@ -4,7 +4,6 @@ from data.stwat import StopWatch
 from datetime import time
 from queue import Queue
 import logging
-
 import data.computer_vision as cv
 
 log = logging.getLogger('user_activity')
@@ -101,5 +100,3 @@ class UserActivity:
                 await self._manage_stopwatch()
             except Exception as e:
                 log.error(e)
-
-# А НА МНЕ СУКА НА ЯХТЕ Э!

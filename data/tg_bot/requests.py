@@ -10,8 +10,8 @@ class DBC:
 
     async def create_pool(self):
         self.pool = await pg.create_pool(
-            user='--',
-            password='--',
+            user='postgres',
+            password='password',
             database='analizer_of_habits',
             host='localhost',
             port='5432',
@@ -27,8 +27,7 @@ class DBC:
             raise pg.exceptions.InterfaceError('Pool is not initialized')
         try:
             async with self.pool.acquire() as con:
-                async with con.transaction():
-                    await con.execute(f'INSERT INTO tg_id_list(tg_id) VALUES({tg_id})')
+                await con.execute(f'INSERT INTO tg_id_list(tg_id) VALUES($1)', tg_id)
         except pg.exceptions.UniqueViolationError:
             print('This ID is already in database')
 
@@ -37,28 +36,46 @@ class DBC:
             raise RuntimeError('Pool is not initialized')
         try:
             async with self.pool.acquire() as con:
-                async with con.transaction():
-                    await con.execute(f'INSERT INTO user_info(tg_id, app, time) '
-                                      f'VALUES({tg_id}, {app}, {time})')
+                await con.execute(f'INSERT INTO user_info(tg_id, app, use_time) '
+                                  f'VALUES($1, $2, $3)', tg_id, app, time)
         except pg.exceptions.UniqueViolationError:
             print('This record is already exists')
 
-    async def get_info(self, tg_id):
+    async def get_info(self, tg_id, table):
         if not self.pool:
             raise RuntimeError('Pool is not initialized')
         async with self.pool.acquire() as con:
-            async with con.transaction():
-                info = [rec for rec in con.fetch(f'SELECT FROM user_info(app, time) '
-                                                 f'WHERE tg_id = {tg_id}')]
+            info = [(rec['app'], rec['use_time'].isoformat()) for rec in
+                    (await con.fetch(f'SELECT app, use_time FROM $1 '
+                                     f'WHERE tg_id = $2', table, tg_id))]
             return info
 
-    async def increment_time(self, tg_id, time):
+    async def increment_time(self, tg_id, time, table):
         if not self.pool:
             raise RuntimeError('Pool is not initialized')
         async with self.pool.acquire() as con:
-            async with con.transaction():
-                await con.execute(f'UPDATE user_info SET time = time + {time} '
-                                  f'WHERE tg_id = {tg_id}')
+            await con.execute(f'UPDATE $1 SET use_time = use_time + $2 '
+                              f'WHERE tg_id = $3', table, time, tg_id)
+
+    async def categories(self, tg_id, table):
+        if not self.pool:
+            raise RuntimeError('Pool is not initialized')
+        async with self.pool.acquire() as con:
+            ctgrs = await con.fetch(f'SELECT category FROM $1 WHERE tg_id = $2', tg_id, table)
+            return [c['category'] for c in ctgrs]
+
+    async def drop_info(self):
+        if not self.pool:
+            raise RuntimeError('Pool is not initialized')
+        async with self.pool.acquire() as con:
+            await con.execute('DELETE FROM user_info')
+
+    async def get_days(self, tg_id):
+        if not self.pool:
+            raise RuntimeError('Pool is not initialized')
+        async with self.pool.acquire() as con:
+            days = await con.fetch(f'SELECT day FROM total_info WHERE tg_id = $1', tg_id)
+            return [day['day'].isoformat() for day in days]
 
     async def on_shutdown(self):
         if hasattr(self.bot, 'pool') and self.bot.pool:

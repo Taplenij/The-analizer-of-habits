@@ -9,6 +9,7 @@ from datetime import time
 from queue import Queue
 import logging
 import data.computer_vision as cv
+from data.tg_bot.requests import DBC
 
 log = logging.getLogger('user_activity')
 log.setLevel(logging.DEBUG )
@@ -23,17 +24,20 @@ sh.setFormatter(formatter)
 log.addHandler(sh)
 
 COMV = cv.ComputerVision()
+req = DBC()
 
 class UserActivity:
-    _STOPWATCH = StopWatch()
-    _STOPWATCH.FLAG = True
-    _STOPWATCH.RUNNING = True
-    _NEXT_STATE = None # New opened window in browser
-    _CURRENT_STATE = None # Current opened window
-    _ELAPSED_TIME = None
-    _MOUSE_STATE = True
-    _FIFOQ: Queue[time] = Queue()
-    _BROWSERS = ['opera', 'chrome', 'safari', 'msedge', 'firefox']
+    def __init__(self, tg_id):
+        self.tg_id = tg_id
+        self._STOPWATCH = StopWatch()
+        self._STOPWATCH.FLAG = True
+        self._STOPWATCH.RUNNING = True
+        self._NEXT_STATE = None # New opened window in browser
+        self._CURRENT_STATE = None # Current opened window
+        self._ELAPSED_TIME = None
+        self._MOUSE_STATE = True
+        self._FIFOQ: Queue[time] = Queue()
+        self._BROWSERS = ['opera', 'chrome', 'safari', 'msedge', 'firefox']
 
     @staticmethod
     async def _get_title(): # This function gets window title
@@ -94,7 +98,15 @@ class UserActivity:
         finally:
             mouse_task.cancel()
             while not self._FIFOQ.empty():
+                await req.create_pool()
+                await req.increment_time(tg_id=self.tg_id,
+                                         time=self._FIFOQ.get(block=False),
+                                         table='user_info')
+                await req.increment_time(tg_id=self.tg_id,
+                                         time=self._FIFOQ.get(block=False),
+                                         table='total_info')
                 log.info(self._FIFOQ.get(block=False))
+
     # This function starts the program
     async def monitor_window(self):
         while True:
@@ -102,6 +114,15 @@ class UserActivity:
                 start_title = await self._check_soc()
                 self._CURRENT_STATE = start_title
                 self._NEXT_STATE = start_title
+                await req.create_pool()
+                await req.record_activity(tg_id=self.tg_id,
+                                          app=self._CURRENT_STATE,
+                                          time=time(hour=0, minute=0, second=0),
+                                          table='user_info')
+                await req.record_activity(tg_id=self.tg_id,
+                                          app=self._CURRENT_STATE,
+                                          time=time(hour=0, minute=0, second=0),
+                                          table='total_info')
                 log.info(self._CURRENT_STATE)
                 await self._manage_stopwatch()
             except Exception as e:

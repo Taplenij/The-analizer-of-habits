@@ -1,5 +1,9 @@
-import pyautogui as pg
 import asyncio
+import win32gui
+import win32process
+import psutil
+import pyautogui as pg
+import os
 from data.stwat import StopWatch
 from datetime import time
 from queue import Queue
@@ -29,13 +33,15 @@ class UserActivity:
     _ELAPSED_TIME = None
     _MOUSE_STATE = True
     _FIFOQ: Queue[time] = Queue()
-    _BROWSERS = {'Opera':'Opera', 'Chrome':'Google Chrome',
-                 'Edge':'Microsoft Edge', 'Safari':'Safari'}
+    _BROWSERS = ['opera', 'chrome', 'safari', 'msedge', 'firefox']
 
     @staticmethod
     async def _get_title(): # This function gets window title
-        active_window = pg.getActiveWindow()
-        return active_window.title.split()[-1] if active_window else False
+        hwnd = win32gui.GetForegroundWindow()
+        _, pid = win32process.GetWindowThreadProcessId(hwnd)
+        process = psutil.Process(pid)
+        actname = process.name()
+        return os.path.splitext(actname)[0] if actname else False
 
     async def _check_soc(self):
         name_title = await self._get_title()

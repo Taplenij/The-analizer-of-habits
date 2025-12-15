@@ -38,7 +38,7 @@ async def com_start(message: Message):
 async def first_stp(message: Message):
     await message.answer('Отлично!👏 Теперь я буду за тобой наблюдать😈')
     log.info('Start tracker')
-    user_activity = UserActivity()
+    user_activity = UserActivity(message.from_user.id)
     monitor_window = asyncio.create_task(user_activity.monitor_window())
     try:
         while True:

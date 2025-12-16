@@ -10,6 +10,7 @@ from queue import Queue
 import logging
 import data.computer_vision as cv
 from data.tg_bot.requests import DBC
+from data.classification.classificator import AppNameClassifier
 
 log = logging.getLogger('user_activity')
 log.setLevel(logging.DEBUG )
@@ -24,11 +25,13 @@ sh.setFormatter(formatter)
 log.addHandler(sh)
 
 COMV = cv.ComputerVision()
-req = DBC()
 
 class UserActivity:
     def __init__(self, tg_id):
         self.tg_id = tg_id
+        self._REQ = DBC()
+        self._CLF = AppNameClassifier()
+        self._CATEGORY = None
         self._STOPWATCH = StopWatch()
         self._STOPWATCH.FLAG = True
         self._STOPWATCH.RUNNING = True
@@ -46,6 +49,29 @@ class UserActivity:
         process = psutil.Process(pid)
         actname = process.name()
         return os.path.splitext(actname)[0] if actname else False
+
+    async def _inct(self, time):
+        await self._REQ.create_pool()
+        await self._REQ.increment_time(tg_id=self.tg_id,
+                                 time=time,
+                                 table='user_info')
+        await self._REQ.increment_time(tg_id=self.tg_id,
+                                 time=time,
+                                 table='total_info')
+
+    async def _recin(self):
+        await self._CLF.vectorize(self._CURRENT_STATE)
+        self._CATEGORY = await self._CLF.get_category()
+        log.info(self._CATEGORY)
+        await self._REQ.create_pool()
+        await self._REQ.record_activity(tg_id=self.tg_id,
+                                  app=self._CURRENT_STATE,
+                                  time=time(hour=0, minute=0, second=0),
+                                  table='user_info', category=self._CATEGORY)
+        await self._REQ.record_activity(tg_id=self.tg_id,
+                                  app=self._CURRENT_STATE,
+                                  time=time(hour=0, minute=0, second=0),
+                                  table='total_info', category=self._CATEGORY)
 
     async def _check_soc(self):
         name_title = await self._get_title()
@@ -98,14 +124,8 @@ class UserActivity:
         finally:
             mouse_task.cancel()
             while not self._FIFOQ.empty():
-                await req.create_pool()
-                await req.increment_time(tg_id=self.tg_id,
-                                         time=self._FIFOQ.get(block=False),
-                                         table='user_info')
-                await req.increment_time(tg_id=self.tg_id,
-                                         time=self._FIFOQ.get(block=False),
-                                         table='total_info')
-                log.info(self._FIFOQ.get(block=False))
+                await self._inct(self._FIFOQ.get())
+                log.info(self._FIFOQ.get())
 
     # This function starts the program
     async def monitor_window(self):
@@ -114,16 +134,8 @@ class UserActivity:
                 start_title = await self._check_soc()
                 self._CURRENT_STATE = start_title
                 self._NEXT_STATE = start_title
-                await req.create_pool()
-                await req.record_activity(tg_id=self.tg_id,
-                                          app=self._CURRENT_STATE,
-                                          time=time(hour=0, minute=0, second=0),
-                                          table='user_info')
-                await req.record_activity(tg_id=self.tg_id,
-                                          app=self._CURRENT_STATE,
-                                          time=time(hour=0, minute=0, second=0),
-                                          table='total_info')
                 log.info(self._CURRENT_STATE)
+                await self._recin()
                 await self._manage_stopwatch()
             except Exception as e:
                 log.error(e)

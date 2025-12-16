@@ -13,7 +13,9 @@ df = pd.read_csv('tables/text_data.csv')
 X = df['DataText'].values
 y = df['Category'].values
 le = LabelEncoder()
-y = le.fit_transform(y)
+le = le.fit(y)
+y = le.transform(y)
+joblib.dump(le, 'lblencdr' + '.z')
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3,
                                                     shuffle=True, stratify=y,
                                                     random_state=1)

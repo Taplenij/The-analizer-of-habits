@@ -59,7 +59,9 @@ def check_stats_for_several_models(clf, method):
             raise ValueError('Method parameter must be hand or pipeline')
 
 def preproc(text):
-    return text.replace(' ', '_')
+    text = re.sub(r'\d', '', text)
+    text = text.replace(' ', '_')
+    return text if text[-1] != '_' else text[:-1]
 
 def preprocessor(text):
     text = re.sub(r'[^\w\s]', '', text)

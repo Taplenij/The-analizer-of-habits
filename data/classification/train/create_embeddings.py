@@ -1,7 +1,7 @@
 import pandas as pd
 import pyprind
 from sentence_transformers import SentenceTransformer
-from data.classification.data_clf import dict_apps
+from data.classification.train.data_clf import dict_apps
 
 models = ['paraphrase-MiniLM-L12-v2', 'distiluse-base-multilingual-cased',
           'multi-qa-mpnet-base-cos-v1', 'multi-qa-distilbert-cos-v1',

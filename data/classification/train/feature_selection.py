@@ -5,7 +5,7 @@ from sklearn.preprocessing import LabelEncoder, StandardScaler
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 
-df = pd.read_csv('tables/model_app_data_multi-qa-mpnet-base-cos-v1.csv')
+df = pd.read_csv('../tables/model_app_data_multi-qa-mpnet-base-cos-v1.csv')
 X = df.iloc[:, 1:].values
 y = df.iloc[:, 0].values
 le = LabelEncoder()

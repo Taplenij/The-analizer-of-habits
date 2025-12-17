@@ -1,4 +1,5 @@
 import joblib
+import numpy as np
 import pandas as pd
 from sklearn.svm import SVC
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -8,14 +9,12 @@ from sklearn.pipeline import make_pipeline, Pipeline
 from data.classification.help_functions import (get_score_info, check_stats_for_several_models,
                                                 preprocessor, tokenizer, tokenizer_porter)
 
-df = pd.read_csv('tables/text_data.csv')
+df = pd.read_csv('../tables/text_data.csv')
 
 X = df['DataText'].values
 y = df['Category'].values
 le = LabelEncoder()
-le = le.fit(y)
-y = le.transform(y)
-joblib.dump(le, 'lblencdr' + '.z')
+y = le.fit_transform(y)
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3,
                                                     shuffle=True, stratify=y,
                                                     random_state=1)

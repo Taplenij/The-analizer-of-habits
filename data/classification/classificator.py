@@ -22,7 +22,6 @@ BASE_DIR = Path(__file__).parent
 
 CLF_PATH = BASE_DIR / 'trained_model.z'
 TRF_PATH = BASE_DIR / 'transformer.z'
-LE_PATH = BASE_DIR / 'lblencdr.z'
 
 def classify(clf, vect):
     labels = {0: 'Education', 1: 'Entertainments',

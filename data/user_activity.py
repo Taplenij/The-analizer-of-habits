@@ -5,12 +5,12 @@ import psutil
 import pyautogui as pg
 import os
 from data.stwat import StopWatch
-from datetime import time
+from datetime import time, date
 from queue import Queue
 import logging
 import data.computer_vision as cv
 from data.tg_bot.requests import DBC
-from data.classification.classificator import AppNameClassifier
+from data.classification import classificator
 
 log = logging.getLogger('user_activity')
 log.setLevel(logging.DEBUG )
@@ -30,7 +30,7 @@ class UserActivity:
     def __init__(self, tg_id):
         self.tg_id = tg_id
         self._REQ = DBC()
-        self._CLF = AppNameClassifier()
+        self._CLF = classificator.AppNameClassifier()
         self._CATEGORY = None
         self._STOPWATCH = StopWatch()
         self._STOPWATCH.FLAG = True
@@ -51,18 +51,19 @@ class UserActivity:
         return os.path.splitext(actname)[0] if actname else False
 
     async def _inct(self, time):
-        await self._REQ.create_pool()
         await self._REQ.increment_time(tg_id=self.tg_id,
                                  time=time,
-                                 table='user_info')
+                                 table='user_info', app=self._CURRENT_STATE)
         await self._REQ.increment_time(tg_id=self.tg_id,
                                  time=time,
-                                 table='total_info')
+                                 table='total_info', app=self._CURRENT_STATE)
 
     async def _recin(self):
         await self._CLF.vectorize(self._CURRENT_STATE)
         self._CATEGORY = await self._CLF.get_category()
-        log.info(self._CATEGORY)
+        log.info(f'{self._CURRENT_STATE} -> {self._CATEGORY}')
+        if not self._CATEGORY:
+            return
         await self._REQ.create_pool()
         await self._REQ.record_activity(tg_id=self.tg_id,
                                   app=self._CURRENT_STATE,
@@ -71,7 +72,8 @@ class UserActivity:
         await self._REQ.record_activity(tg_id=self.tg_id,
                                   app=self._CURRENT_STATE,
                                   time=time(hour=0, minute=0, second=0),
-                                  table='total_info', category=self._CATEGORY)
+                                  table='total_info', category=self._CATEGORY, day=date.today())
+        log.info(f'{self._CURRENT_STATE} has been recorded')
 
     async def _check_soc(self):
         name_title = await self._get_title()
@@ -124,8 +126,10 @@ class UserActivity:
         finally:
             mouse_task.cancel()
             while not self._FIFOQ.empty():
-                await self._inct(self._FIFOQ.get())
-                log.info(self._FIFOQ.get())
+                log.info(type(self._FIFOQ.get(block=False)))
+                await self._inct(self._FIFOQ.get(block=False))
+                log.info('Time has been recorded')
+                log.info(self._FIFOQ.get(block=False))
 
     # This function starts the program
     async def monitor_window(self):

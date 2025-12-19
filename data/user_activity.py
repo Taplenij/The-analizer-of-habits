@@ -5,7 +5,7 @@ import psutil
 import pyautogui as pg
 import os
 from data.stwat import StopWatch
-from datetime import time, date
+from datetime import timedelta, date
 from queue import Queue
 import logging
 import data.computer_vision as cv
@@ -39,7 +39,6 @@ class UserActivity:
         self._CURRENT_STATE = None # Current opened window
         self._ELAPSED_TIME = None
         self._MOUSE_STATE = True
-        self._FIFOQ: Queue[time] = Queue()
         self._BROWSERS = ['opera', 'chrome', 'safari', 'msedge', 'firefox']
 
     @staticmethod
@@ -51,12 +50,10 @@ class UserActivity:
         return os.path.splitext(actname)[0] if actname else False
 
     async def _inct(self, time):
-        await self._REQ.increment_time(tg_id=self.tg_id,
-                                 time=time,
-                                 table='user_info', app=self._CURRENT_STATE)
-        await self._REQ.increment_time(tg_id=self.tg_id,
-                                 time=time,
-                                 table='total_info', app=self._CURRENT_STATE)
+        await self._REQ.increment_time(tg_id=self.tg_id, time=time, table='user_info',
+                                       app=self._CURRENT_STATE, category=self._CATEGORY)
+        await self._REQ.increment_time(tg_id=self.tg_id, time=time, table='total_info',
+                                       app=self._CURRENT_STATE, category=self._CATEGORY)
 
     async def _recin(self):
         await self._CLF.vectorize(self._CURRENT_STATE)
@@ -67,11 +64,11 @@ class UserActivity:
         await self._REQ.create_pool()
         await self._REQ.record_activity(tg_id=self.tg_id,
                                   app=self._CURRENT_STATE,
-                                  time=time(hour=0, minute=0, second=0),
+                                  time=timedelta(0, 0),
                                   table='user_info', category=self._CATEGORY)
         await self._REQ.record_activity(tg_id=self.tg_id,
                                   app=self._CURRENT_STATE,
-                                  time=time(hour=0, minute=0, second=0),
+                                  time=timedelta(0, 0),
                                   table='total_info', category=self._CATEGORY, day=date.today())
         log.info(f'{self._CURRENT_STATE} has been recorded')
 
@@ -118,18 +115,14 @@ class UserActivity:
                     self._NEXT_STATE = await self._check_soc()
                 else:
                     # When app has been changed drops the elapsed time and gets one
-                    cur_t = time(**await self._STOPWATCH.grab_current_time())
-                    self._FIFOQ.put(cur_t, block=False) # Saves it in FIFO queue...
+                    self.cur_t = timedelta(**await self._STOPWATCH.grab_current_time())
                     self._STOPWATCH.FLAG = False # ...and drops the stopwatch
                     await self._STOPWATCH.stop()
                 await asyncio.sleep(1)
         finally:
             mouse_task.cancel()
-            while not self._FIFOQ.empty():
-                log.info(type(self._FIFOQ.get(block=False)))
-                await self._inct(self._FIFOQ.get(block=False))
-                log.info('Time has been recorded')
-                log.info(self._FIFOQ.get(block=False))
+            await self._inct(self.cur_t)
+            log.info('Time has been recorded')
 
     # This function starts the program
     async def monitor_window(self):

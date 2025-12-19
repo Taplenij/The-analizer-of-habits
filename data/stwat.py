@@ -21,7 +21,8 @@ class StopWatch:
         return self.ELAPSED_TIME.format(hours, minutes, seconds)
 
     async def grab_current_time(self):
-        return dict(hour=(self._CURRENT_STATE.seconds // 3600),
-                    minute=((self._CURRENT_STATE.seconds // 60) % 60),
-                    second=(self._CURRENT_STATE.seconds % 60)
+        return dict(
+                    hours=(self._CURRENT_STATE.seconds // 3600),
+                    minutes=((self._CURRENT_STATE.seconds // 60) % 60),
+                    seconds=(self._CURRENT_STATE.seconds % 60)
                     )

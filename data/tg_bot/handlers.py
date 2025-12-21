@@ -1,11 +1,13 @@
 import asyncio
 import logging
 from aiogram import Router, F
-from aiogram.types import Message, CallbackQuery
+from aiogram.types import Message, CallbackQuery, FSInputFile
 from aiogram.filters import Command
+
 from data.tg_bot.requests import DBC
 import keyboards as kb
 from data.user_activity import UserActivity
+from data.display_statistics import Statistic
 
 log = logging.getLogger('handlers')
 log.setLevel(logging.DEBUG)
@@ -22,8 +24,9 @@ log.addHandler(sh)
 router = Router()
 
 req = DBC()
+stat = Statistic()
 
-
+active_trackers = {}
 @router.message(Command('start'))
 async def com_start(message: Message):
     await message.answer('Привет,'
@@ -36,18 +39,35 @@ async def com_start(message: Message):
 
 @router.callback_query(F.data == 'start')
 async def first_stp(callback: CallbackQuery):
-    await callback.answer('Отлично!👏 Теперь я буду за тобой наблюдать😈')
-    log.info('Start tracker')
-    user_activity = UserActivity(callback.from_user.id)
-    monitor_window = asyncio.create_task(user_activity.monitor_window())
-    try:
-        while True:
-            await asyncio.sleep(1)
-    except KeyboardInterrupt:
-        monitor_window.cancel()
-        print('interrupted')
-    except Exception as e:
-        print(f'EXCEPTION {e}')
+    user_id = callback.from_user.id
+    if user_id in active_trackers:
+        await callback.answer('Трекер уже запущен')
+        return
+    else:
+        user_act = UserActivity(user_id)
+        active_trackers[user_id] = user_act
+
+        await callback.answer('Отлично!👏 Теперь я буду за тобой наблюдать😈')
+        log.info('Start tracker')
+
+        user_activity = UserActivity(callback.from_user.id)
+        asyncio.create_task(user_activity.monitor_window())
+
+
+
+@router.callback_query(F.data=='stop')
+async def stop(callback: CallbackQuery):
+    user_id = callback.from_user.id
+
+    if user_id in active_trackers:
+        user_act = active_trackers[user_id]
+        user_act.WORKER = False
+
+        del active_trackers[user_id]
+        await callback.answer('Программа остановлена')
+        await callback.message.answer('Программа была остановлена🛑')
+    else:
+        await callback.answer('Трекер и так не запущен', show_alert=True)
 
 
 @router.callback_query(F.data=='info')
@@ -57,8 +77,17 @@ async def second_stp(callback: CallbackQuery):
                                   reply_markup=kb.types)
 
 
+@router.callback_query(F.data=='day')
+async def day(callback:CallbackQuery):
+    await callback.answer(' ')
+    await stat.top10(callback.from_user.id)
+    await callback.message.answer('Вот что мне удалось записать:')
+    photo = FSInputFile('t10.png')
+    await callback.message.answer_photo(photo)
+
+
 @router.callback_query(F.data=='weeknd')
 async def week(callback: CallbackQuery):
     await callback.answer(' ')
-    await callback.message.answer('Выберите какой вид результатов хотите изучить:',
+    await callback.message.answer('Выберите, в каком виде хотите получить результат:',
                                   reply_markup=kb.weekend)

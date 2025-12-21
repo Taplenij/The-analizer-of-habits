@@ -10,7 +10,7 @@ keyboard = InlineKeyboardMarkup(inline_keyboard=[[
 ])
 
 types = InlineKeyboardMarkup(inline_keyboard=[[
-        InlineKeyboardButton(text='За один день', callback_data='one'),
+        InlineKeyboardButton(text='За один день', callback_data='day'),
         InlineKeyboardButton(text='За неделю', callback_data='weeknd')
     ],
     [
@@ -23,4 +23,10 @@ weekend = InlineKeyboardMarkup(inline_keyboard=[
         InlineKeyboardButton(text='Общий', callback_data='weeknd_genrl'),
         InlineKeyboardButton(text='Подробный', callback_data='weekend_detld')
     ]
+])
+
+stop = InlineKeyboardMarkup(inline_keyboard=[
+        [
+            InlineKeyboardButton(text='СТОП', callback_data='stop')
+        ],
 ])

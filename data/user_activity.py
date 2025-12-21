@@ -28,6 +28,7 @@ COMV = cv.ComputerVision()
 
 class UserActivity:
     def __init__(self, tg_id):
+        self.WORKER = True
         self.tg_id = tg_id
         self._REQ = DBC()
         self._CLF = classificator.AppNameClassifier()
@@ -126,7 +127,7 @@ class UserActivity:
 
     # This function starts the program
     async def monitor_window(self):
-        while True:
+        while self.WORKER:
             try:
                 start_title = await self._check_soc()
                 self._CURRENT_STATE = start_title

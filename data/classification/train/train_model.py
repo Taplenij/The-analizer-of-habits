@@ -9,7 +9,7 @@ from sklearn.pipeline import make_pipeline, Pipeline
 from data.classification.help_functions import (get_score_info, check_stats_for_several_models,
                                                 preprocessor, tokenizer, tokenizer_porter)
 
-df = pd.read_csv('../tables/text_data.csv')
+df = pd.read_csv('tables/text_data.csv')
 
 X = df['DataText'].values
 y = df['Category'].values

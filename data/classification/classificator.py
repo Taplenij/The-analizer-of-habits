@@ -2,7 +2,7 @@ import joblib
 import logging
 import aiohttp
 import asyncio
-from data.classification.help_functions import preproc
+from data.classification.help_functions import preproc_2
 from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
 
@@ -41,7 +41,7 @@ class AppNameClassifier:
 
     async def vectorize(self, app):
         async with aiohttp.ClientSession(headers=self._HEADERS) as session:
-            async with session.get(f'https://en.wikipedia.org/api/rest_v1/page/summary/{preproc(app)}') as r:
+            async with session.get(f'https://en.wikipedia.org/api/rest_v1/page/summary/{preproc_2(app)}') as r:
                 if r.status != 200:
                     log.error('Error occured with getting info about app')
                     self._FLAG = False

@@ -7,7 +7,7 @@ from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
 from sklearn.pipeline import make_pipeline
 from sklearn.model_selection import train_test_split
 
-df = pd.read_csv('model_app_data_paraphrase-MiniLM-L12-v2.csv', encoding='utf-8')
+df = pd.read_csv('tables/model_app_data_paraphrase-MiniLM-L12-v2.csv', encoding='utf-8')
 
 X = df.iloc[:, 1:].values
 y = df.iloc[:, 0].values

@@ -24,13 +24,13 @@ class Statistic:
         apps_ = (await req.get_info(tg_id, 'user_info'))[:, 0]
         times_ = (await req.get_info(tg_id, 'user_info'))[:, 1]
         times_s_ = await req.get_time(tg_id, 'user_info')
-        indices = np.argsort(times_)
+        # indices = np.argsort(times_)
 
         plt.title('Top 10 most used apps')
-        plt.bar(range(len(times_)), times_[indices],
-                align='edge', width=0.5)
-        plt.xticks(range(len(apps_)), apps_[indices], rotation=90)
-        plt.yticks(range(len(times_)), times_s_[indices])
+        plt.bar(range(len(times_)), times_,
+                align='center', width=0.5)
+        plt.xticks(range(len(apps_)), apps_, rotation=90)
+        plt.yticks(range(len(times_)), times_s_)
         plt.ylabel('Used time')
         plt.tight_layout()
         plt.savefig('t10.png')

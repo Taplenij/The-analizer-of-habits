@@ -50,8 +50,10 @@ async def first_stp(callback: CallbackQuery):
         await callback.answer('Отлично!👏 Теперь я буду за тобой наблюдать😈')
         log.info('Start tracker')
 
-        user_activity = UserActivity(callback.from_user.id)
-        asyncio.create_task(user_activity.monitor_window())
+        await callback.message.answer('Вы можете остановить работу программы, если хотите.',
+                                      reply_markup=kb.stop)
+
+        asyncio.create_task(active_trackers[user_id].monitor_window())
 
 
 
@@ -64,7 +66,7 @@ async def stop(callback: CallbackQuery):
         user_act.WORKER = False
 
         del active_trackers[user_id]
-        await callback.answer('Программа остановлена')
+        await callback.answer(' ')
         await callback.message.answer('Программа была остановлена🛑')
     else:
         await callback.answer('Трекер и так не запущен', show_alert=True)

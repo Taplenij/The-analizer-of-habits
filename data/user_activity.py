@@ -11,6 +11,7 @@ import logging
 import data.computer_vision as cv
 from data.tg_bot.requests import DBC
 from data.classification import classificator
+from data.tg_bot.requests import DBC
 
 log = logging.getLogger('user_activity')
 log.setLevel(logging.DEBUG )
@@ -25,6 +26,7 @@ sh.setFormatter(formatter)
 log.addHandler(sh)
 
 COMV = cv.ComputerVision()
+REQ = DBC()
 
 class UserActivity:
     def __init__(self, tg_id):
@@ -134,7 +136,13 @@ class UserActivity:
             cur_day_ = date.today()
             if cur_day_ > self.LAST_DAY:
                 log.info('NEW DAY')
+                await REQ.create_pool()
+                await REQ.drop_info(table='user_info')
                 self.LAST_DAY = date.today()
+            if self.LAST_DAY - cur_day_:
+                log.info('NEW WEEK')
+                await REQ.create_pool()
+                await REQ.drop_info()
             try:
                 start_title = await self._check_soc()
                 if not start_title:

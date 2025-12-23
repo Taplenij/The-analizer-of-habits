@@ -105,7 +105,7 @@ class DBC:
                 raise RuntimeError('Pool is not initialized')
             async with self.pool.acquire() as con:
                 await con.execute(f'UPDATE {table} SET use_time = use_time + $1 '
-                                  'WHERE tg_id = $2 AND app = $3'
+                                  'WHERE tg_id = $2 AND app = $3 '
                                   'AND category = $4',
                                   time, tg_id, app, category)
         except KeyboardInterrupt:

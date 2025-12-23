@@ -1,9 +1,11 @@
-import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
 import matplotlib
 from data.tg_bot.requests import DBC
+from data.classification.help_functions import time_formatter
+import numpy as np
 
-matplotlib.use('Agg')
+
 req = DBC()
 
 class Statistic:
@@ -22,18 +24,21 @@ class Statistic:
     async def top10(self, tg_id):
         await req.create_pool()
         apps_ = (await req.get_info(tg_id, 'user_info'))[:, 0]
-        times_ = (await req.get_info(tg_id, 'user_info'))[:, 1]
+        times_ = np.array([int(t) for t in (await req.get_info(tg_id, 'user_info'))[:, 1]])
         times_s_ = await req.get_time(tg_id, 'user_info')
-        # indices = np.argsort(times_)
+        indices = np.argsort(times_)[::-1]
+
+        fig, ax = plt.subplots()
+
+        bars = ax.bar(apps_[indices], times_[indices])
+
+        ax.yaxis.set_major_formatter(ticker.FuncFormatter(time_formatter))
 
         plt.title('Top 10 most used apps')
-        plt.bar(range(len(times_)), times_,
-                align='center', width=0.5)
-        plt.xticks(range(len(apps_)), apps_, rotation=90)
-        plt.yticks(range(len(times_)), times_s_)
         plt.ylabel('Used time')
         plt.tight_layout()
         plt.savefig('t10.png')
+        plt.close()
 
     async def total(self, tg_id):
         await req.create_pool()
@@ -47,6 +52,7 @@ class Statistic:
         plt.ylabel('Used time')
         plt.tight_layout()
         plt.savefig('total_s_b.png')
+        plt.close()
 
         plt.plot(range(len(days_)),
                  (await req.get_info(tg_id, 'total_info')))
@@ -54,3 +60,4 @@ class Statistic:
         plt.ylabel('Total time')
         plt.tight_layout()
         plt.savefig('total_s_p.png')
+        plt.close()

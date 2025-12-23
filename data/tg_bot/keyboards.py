@@ -11,17 +11,14 @@ keyboard = InlineKeyboardMarkup(inline_keyboard=[[
 
 types = InlineKeyboardMarkup(inline_keyboard=[[
         InlineKeyboardButton(text='За один день', callback_data='day'),
-        InlineKeyboardButton(text='За неделю', callback_data='weeknd')
+        InlineKeyboardButton(text='За неделю', callback_data='week')
     ],
-    [
-        InlineKeyboardButton(text='Получить все результаты', callback_data='all')
-    ]
 ])
 
 weekend = InlineKeyboardMarkup(inline_keyboard=[
     [
-        InlineKeyboardButton(text='Общий', callback_data='weeknd_genrl'),
-        InlineKeyboardButton(text='Подробный', callback_data='weekend_detld')
+        InlineKeyboardButton(text='По дням', callback_data='week_d'),
+        InlineKeyboardButton(text='По категориям', callback_data='weeke_c')
     ]
 ])
 

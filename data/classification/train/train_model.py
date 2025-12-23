@@ -4,7 +4,7 @@ from sklearn.svm import SVC
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
-from data.help_functions import (preprocessor, tokenizer_porter)
+from data.classification.help_functions import (preprocessor, tokenizer_porter)
 
 df = pd.read_csv('tables/text_data.csv')
 

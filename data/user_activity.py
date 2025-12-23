@@ -57,7 +57,8 @@ class UserActivity:
         await self._REQ.increment_time(tg_id=self.tg_id, time=time, table='user_info',
                                        app=self._CURRENT_STATE, category=self._CATEGORY)
         await self._REQ.increment_time(tg_id=self.tg_id, time=time, table='total_info',
-                                       app=self._CURRENT_STATE, category=self._CATEGORY)
+                                       app=self._CURRENT_STATE, category=self._CATEGORY,
+                                       day=self.LAST_DAY)
 
     async def _recin(self):
         await self._CLF.vectorize(self._CURRENT_STATE)
@@ -65,15 +66,19 @@ class UserActivity:
         log.info(f'{self._CURRENT_STATE} -> {self._CATEGORY}')
         if not self._CATEGORY:
             return
+        log.info(f'Last day --> {self.LAST_DAY}')
         await self._REQ.create_pool()
         await self._REQ.record_activity(tg_id=self.tg_id,
-                                  app=self._CURRENT_STATE,
-                                  time=timedelta(0, 0),
-                                  table='user_info', category=self._CATEGORY)
+                                        app=self._CURRENT_STATE,
+                                        time=timedelta(0, 0),
+                                        table='user_info',
+                                        category=self._CATEGORY)
         await self._REQ.record_activity(tg_id=self.tg_id,
-                                  app=self._CURRENT_STATE,
-                                  time=timedelta(0, 0),
-                                  table='total_info', category=self._CATEGORY, day=date.today())
+                                        app=self._CURRENT_STATE,
+                                        time=timedelta(0, 0),
+                                        table='total_info',
+                                        category=self._CATEGORY,
+                                        day=self.LAST_DAY)
         log.info(f'{self._CURRENT_STATE} has been recorded')
 
     async def _check_soc(self):
@@ -142,7 +147,7 @@ class UserActivity:
             if self.LAST_DAY - cur_day_:
                 log.info('NEW WEEK')
                 await REQ.create_pool()
-                await REQ.drop_info()
+                await REQ.drop_info(table='total_info')
             try:
                 start_title = await self._check_soc()
                 if not start_title:

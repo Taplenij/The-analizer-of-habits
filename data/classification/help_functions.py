@@ -2,6 +2,7 @@ import re
 import numpy as np
 import os
 import pandas as pd
+from datetime import date, datetime
 from sklearn.model_selection import cross_val_score
 from sklearn.metrics import accuracy_score
 from sklearn.preprocessing import StandardScaler, LabelEncoder
@@ -84,3 +85,14 @@ def time_formatter(x, pos):
     minutes = (total_seconds % 3600) // 60
     seconds = total_seconds % 60
     return f"{hours:02}:{minutes:02}:{seconds:02}"
+
+def week_days(day):
+    now = datetime.now()
+    now_week = now.weekday()
+    day_list = str(day).split('-')
+    y = day_list[0]
+    m = day_list[1]
+    days = [i for i in range(int(day_list[2]) - now_week, int(day_list[2]) + 2)]
+    days_str = [f'{y}-{m}-{d}' for d in days]
+    days_date = [date(year=int(y), month=int(m), day=int(d)) for d in days]
+    return days_str, days_date

@@ -2,6 +2,7 @@ import asyncpg as pg
 from aiogram import Bot
 from config import TOKEN
 import numpy as np
+from data.classification.help_functions import week_days
 
 
 class DBC:
@@ -55,15 +56,24 @@ class DBC:
         except KeyboardInterrupt:
             print('Stop query')
 
-    async def get_info(self, tg_id, table):
+    async def get_info(self, tg_id, table, day=None):
         try:
             if not self.pool:
                 raise RuntimeError('Pool is not initialized')
             async with self.pool.acquire() as con:
-                info = np.array([[rec['app'], rec['use_time'].seconds] for rec in
-                        (await con.fetch(f'SELECT app, use_time FROM {table} '
-                                         'WHERE tg_id = $1', tg_id))])
-                return info
+                if table == 'user_info':
+                    info = np.array([[rec['app'], rec['use_time'].seconds] for rec in
+                            (await con.fetch(f'SELECT app, use_time FROM user_info '
+                                             'WHERE tg_id = $1', tg_id))])
+                    return info
+                elif table == 'total_info':
+                    times = []
+                    days_s, days_d = week_days(day)
+                    for d in days_d:
+                        val = await con.fetchval('SELECT SUM(use_time) FROM total_info'
+                                                  'WHERE day = $1', d)
+                        times.append(int(val.seconds))
+                    return np.array(times)
         except KeyboardInterrupt:
             print('Stop query')
 
@@ -94,29 +104,38 @@ class DBC:
             if not self.pool:
                 raise RuntimeError('Pool is not initialized')
             async with self.pool.acquire() as con:
-                days = await con.fetch(f'SELECT day FROM total_info WHERE tg_id = $1', tg_id)
-                return np.array([day['day'].isoformat() for day in days])
+                days = np.array([d['day'] for d in
+                                 (await con.fetch(f'SELECT day FROM total_info WHERE tg_id = $1',
+                                                  tg_id))])
+                return np.unique(days)
         except KeyboardInterrupt:
             print('Stop query')
 
-    async def increment_time(self, tg_id, time, table, app, category):
+    async def increment_time(self, tg_id, time, table, app, category, day=None):
         try:
             if not self.pool:
                 raise RuntimeError('Pool is not initialized')
             async with self.pool.acquire() as con:
-                await con.execute(f'UPDATE {table} SET use_time = use_time + $1 '
-                                  'WHERE tg_id = $2 AND app = $3 '
-                                  'AND category = $4',
-                                  time, tg_id, app, category)
+                if table == 'user_info':
+                    await con.execute('UPDATE user_info SET use_time = use_time + $1 '
+                                      'WHERE tg_id = $2 AND app = $3 '
+                                      'AND category = $4',
+                                      time, tg_id, app, category)
+                elif table == 'total_info':
+                    await con.execute('UPDATE total_info SET use_time = use_time + $1 '
+                                      'WHERE tg_id = $2 AND app = $3 '
+                                      'AND category = $4 AND day = $5',
+                                      time, tg_id, app, category, day)
+
         except KeyboardInterrupt:
             print('Stop query')
 
-    async def drop_info(self):
+    async def drop_info(self, table):
         try:
             if not self.pool:
                 raise RuntimeError('Pool is not initialized')
             async with self.pool.acquire() as con:
-                await con.execute('DELETE FROM user_info')
+                await con.execute(f'DELETE FROM {table}')
         except KeyboardInterrupt:
             print('Stop query')
 

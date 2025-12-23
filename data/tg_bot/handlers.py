@@ -88,8 +88,16 @@ async def day(callback:CallbackQuery):
     await callback.message.answer_photo(photo)
 
 
-@router.callback_query(F.data=='weeknd')
+@router.callback_query(F.data=='week')
 async def week(callback: CallbackQuery):
     await callback.answer(' ')
     await callback.message.answer('Выберите, в каком виде хотите получить результат:',
                                   reply_markup=kb.weekend)
+
+@router.callback_query(F.data=='week_d')
+async def week_d(callback: CallbackQuery):
+    await callback.answer(' ')
+    await stat.week_d(callback.from_user.id)
+    await callback.message.answer('Дневная статистика:')
+    photo = FSInputFile('week_d.png')
+    await callback.message.answer_photo(photo)

@@ -1,5 +1,5 @@
 from data.classification.train.data_clf import dict_apps, addit_data
-from data.help_functions import preproc
+from data.classification.help_functions import preproc
 import requests
 import pandas as pd
 import pyprind

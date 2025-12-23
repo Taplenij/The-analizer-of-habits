@@ -1,8 +1,7 @@
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
-import matplotlib
 from data.tg_bot.requests import DBC
-from data.classification.help_functions import time_formatter
+from data.help_functions import time_formatter
 import numpy as np
 
 

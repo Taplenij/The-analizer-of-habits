@@ -1,13 +1,10 @@
 import joblib
-import numpy as np
 import pandas as pd
 from sklearn.svm import SVC
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
-from sklearn.pipeline import make_pipeline, Pipeline
-from data.classification.help_functions import (get_score_info, check_stats_for_several_models,
-                                                preprocessor, tokenizer, tokenizer_porter)
+from data.help_functions import (preprocessor, tokenizer_porter)
 
 df = pd.read_csv('tables/text_data.csv')
 

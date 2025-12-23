@@ -2,7 +2,7 @@ import joblib
 import logging
 import aiohttp
 import asyncio
-from data.classification.help_functions import preproc_2
+from data.help_functions import preproc_2
 from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
 

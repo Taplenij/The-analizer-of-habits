@@ -28,6 +28,7 @@ COMV = cv.ComputerVision()
 
 class UserActivity:
     def __init__(self, tg_id):
+        self.LAST_DAY = date.today()
         self.WORKER = True
         self.tg_id = tg_id
         self._REQ = DBC()
@@ -82,7 +83,7 @@ class UserActivity:
             return name_title # If it's not a browser, return founded title
 
     async def _mouse_pos(self): # Checking if user is active
-        while True:
+        while self.WORKER:
             pos1 = pg.position()
             await asyncio.sleep(5)
             pos2 = pg.position()
@@ -109,7 +110,7 @@ class UserActivity:
         self._STOPWATCH.FLAG = True
         self._MOUSE_STATE = True
         try:
-            while await self._state_stopwatch(): # While stopwatch working...
+            while self.WORKER and await self._state_stopwatch(): # While stopwatch working...
                 if await self._state_machine(): # ...and if app hasn't been changed
                     print(f'\r{self._ELAPSED_TIME}', end=' ')
                     self._ELAPSED_TIME = await self._STOPWATCH.increment()
@@ -120,6 +121,8 @@ class UserActivity:
                     self._STOPWATCH.FLAG = False # ...and drops the stopwatch
                     await self._STOPWATCH.stop()
                 await asyncio.sleep(1)
+            if not self.WORKER:
+                self.cur_t = timedelta(**await self._STOPWATCH.grab_current_time())
         finally:
             mouse_task.cancel()
             await self._inct(self.cur_t)
@@ -128,8 +131,15 @@ class UserActivity:
     # This function starts the program
     async def monitor_window(self):
         while self.WORKER:
+            cur_day_ = date.today()
+            if cur_day_ > self.LAST_DAY:
+                log.info('NEW DAY')
+                self.LAST_DAY = date.today()
             try:
                 start_title = await self._check_soc()
+                if not start_title:
+                    await asyncio.sleep(1)
+                    continue
                 self._CURRENT_STATE = start_title
                 self._NEXT_STATE = start_title
                 log.info(self._CURRENT_STATE)

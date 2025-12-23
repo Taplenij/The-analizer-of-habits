@@ -77,3 +77,10 @@ def tokenizer(text):
 
 def tokenizer_porter(text):
     return [porter.stem(word) for word in text]
+
+def time_formatter(x, pos):
+    total_seconds = int(x)
+    hours = total_seconds // 3600
+    minutes = (total_seconds % 3600) // 60
+    seconds = total_seconds % 60
+    return f"{hours:02}:{minutes:02}:{seconds:02}"

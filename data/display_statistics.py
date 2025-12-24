@@ -25,7 +25,6 @@ class Statistic:
         await req.create_pool()
         apps_ = (await req.get_info(tg_id, 'user_info'))[:, 0]
         times_ = np.array([int(t) for t in (await req.get_info(tg_id, 'user_info'))[:, 1]])
-        times_s_ = await req.get_time(tg_id, 'user_info')
         indices = np.argsort(times_)[::-1]
 
         fig, ax = plt.subplots()
@@ -34,6 +33,10 @@ class Statistic:
 
         ax.yaxis.set_major_formatter(ticker.FuncFormatter(time_formatter))
 
+        plt.ylim(bottom=0)
+        if max(times_, default=0) > 0:
+            plt.ylim(top=max(times_) * 1.2)
+
         plt.title('Топ 10 используемых приложений')
         plt.ylabel('Затраченное время')
         plt.tight_layout()
@@ -41,17 +44,28 @@ class Statistic:
         plt.close()
 
     async def week_d(self, tg_id):
+        await req.create_pool()
         day_ = date.today()
         day_l_, day_d = week_days(day_)
-        times_ = await req.get_info(tg_id, day_)
-        times_l_ = np.array([str(timedelta(seconds=t)) for t in times_])
+        times_ = await req.get_info(tg_id, 'total_info', day_)
 
-        plt.plot(range(len(day_d)), times_)
+        fig = plt.figure(figsize=(10, 6))
+
+        plt.plot(range(len(day_d)), times_, marker='o', color='blue')
         plt.fill_between(range(len(day_d)), times_, color='blue', alpha=0.3)
-        plt.yticks(range(len(times_l_)), times_l_)
+
+        plt.xticks(range(len(day_d)), day_l_, rotation=90)
+
+        ax = plt.gca()
+        ax.yaxis.set_major_formatter(ticker.FuncFormatter(time_formatter))
+        plt.ylim(bottom=0)
+        if max(times_, default=0) > 0:
+            plt.ylim(top=max(times_) * 1.2)
+
         plt.ylabel('Затраченное время')
-        plt.xlabel('Дата')
-        plt.title('Статистика по дням')
+        plt.title('Статистика за неделю')
+        plt.grid(True, linestyle='--', alpha=0.6)
+
         plt.tight_layout()
         plt.savefig('week_d.png')
         plt.close()
@@ -59,22 +73,24 @@ class Statistic:
 
     async def week_c(self, tg_id):
         await req.create_pool()
-        categories_ = (await req.categories(tg_id, 'total_info'))
-        days_ = (await req.get_days(tg_id))
+        times_ = await req.get_time_catgrs(tg_id, 'total_info')
+        catgrs_ = np.unique(await req.categories(tg_id, 'total_info'))
 
-        plt.title('Total statistic')
-        plt.bar(range(len(categories_)),
-                categories_, align='center')
-        plt.xticks(range(len(categories_)), categories_, rotation=90)
-        plt.ylabel('Used time')
-        plt.tight_layout()
-        plt.savefig('total_s_b.png')
-        plt.close()
+        fig = plt.figure(figsize=(10, 6))
 
-        plt.plot(range(len(days_)),
-                 (await req.get_info(tg_id, 'total_info')))
-        plt.xticks(range(len(days_)), days_, rotation=90)
-        plt.ylabel('Total time')
+        plt.bar(range(len(catgrs_)), times_)
+        plt.xticks(range(len(catgrs_)), catgrs_)
+
+        ax = plt.gca()
+        ax.yaxis.set_major_formatter(ticker.FuncFormatter(time_formatter))
+        plt.ylim(bottom=0)
+        if max(times_, default=0) > 0:
+            plt.ylim(top=max(times_) * 1.2)
+
+        plt.title('Статистика по категориям')
+        plt.xlabel('Категории')
+        plt.ylabel('Затраченное время')
+
         plt.tight_layout()
-        plt.savefig('total_s_p.png')
+        plt.savefig('week_c.png')
         plt.close()

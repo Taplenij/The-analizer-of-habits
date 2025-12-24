@@ -18,7 +18,7 @@ types = InlineKeyboardMarkup(inline_keyboard=[[
 weekend = InlineKeyboardMarkup(inline_keyboard=[
     [
         InlineKeyboardButton(text='По дням', callback_data='week_d'),
-        InlineKeyboardButton(text='По категориям', callback_data='weeke_c')
+        InlineKeyboardButton(text='По категориям', callback_data='week_c')
     ]
 ])
 

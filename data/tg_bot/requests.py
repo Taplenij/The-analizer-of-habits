@@ -3,6 +3,7 @@ from aiogram import Bot
 from config import TOKEN
 import numpy as np
 from data.classification.help_functions import week_days
+from data.classification.train.data_clf import categories
 
 
 class DBC:
@@ -70,21 +71,25 @@ class DBC:
                     times = []
                     days_s, days_d = week_days(day)
                     for d in days_d:
-                        val = await con.fetchval('SELECT SUM(use_time) FROM total_info'
-                                                  'WHERE day = $1', d)
+                        val = await con.fetchval('SELECT SUM(use_time) FROM total_info '
+                                                  'WHERE day = $1 AND tg_id = $2',
+                                                 d, tg_id)
                         times.append(int(val.seconds))
-                    return np.array(times)
+                    return times
         except KeyboardInterrupt:
             print('Stop query')
 
-    async def get_time(self, tg_id, table):
+    async def get_time_catgrs(self, tg_id, table):
         try:
             if not self.pool:
                 raise RuntimeError('Pool is not initialized')
             async with self.pool.acquire() as con:
-                times = np.array([str(t['use_time']) for t in
-                                  (await con.fetch(f'SELECT use_time FROM {table} '
-                                                   'WHERE tg_id = $1', tg_id))])
+                times = []
+                for c in categories:
+                    val = await con.fetchval(f'SELECT SUM(use_time) FROM {table} '
+                                             'WHERE category = $1 AND tg_id = $2',
+                                             c, tg_id)
+                    times.append(int(val.seconds))
                 return times
         except KeyboardInterrupt:
             print('Stop query')

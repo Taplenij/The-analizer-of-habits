@@ -92,7 +92,7 @@ def week_days(day):
     day_list = str(day).split('-')
     y = day_list[0]
     m = day_list[1]
-    days = [i for i in range(int(day_list[2]) - now_week, int(day_list[2]) + 2)]
+    days = [i for i in range(int(day_list[2]) - now_week, int(day_list[2]))]
     days_str = [f'{y}-{m}-{d}' for d in days]
     days_date = [date(year=int(y), month=int(m), day=int(d)) for d in days]
     return days_str, days_date

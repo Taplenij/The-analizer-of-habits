@@ -25,6 +25,8 @@ X_train_v = tfidf.fit_transform(X_train)
 X_test_v = tfidf.transform(X_test)
 clf_v = clf.fit(X_train_v, y_train)
 
-get_score_info(clf_v, X_train_v, X_test_v, y_train, y_test)
+# Введение дополнительных метрик
+# get_score_info(clf_v, X_train_v, X_test_v, y_train, y_test)
+
 joblib.dump(clf_v, 'trained_model' + '.z')
 joblib.dump(tfidf, 'transformer' + '.z')
